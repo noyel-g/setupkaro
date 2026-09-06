@@ -14,13 +14,14 @@ const desc = "How much to charge for video editing per minute in India? Reels, Y
 <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Editors India</span>
 </header>
 <main class="max-w-2xl mx-auto px-4 pb-10">
-<h1 class="text-3xl font-extrabold mt-4">Video editing: per minute charge?</h1>
+<div class="text-xs text-gray-500 mt-4">By Noyel G • Updated 6 Sept 2026</div>
+<h1 class="text-3xl font-extrabold mt-1">Video editing: per minute charge?</h1>
 <p class="text-gray-600 mt-1">Reels edit ≠ YouTube edit. Select type, get INR.</p>
 <div class="bg-white rounded-2xl shadow-lg border mt-5 overflow-hidden">
 <div class="bg-gray-900 text-white px-5 py-4">
 <div class="text-xs opacity-70">QUOTE TO CLIENT</div>
-<div id="out" class="text-4xl font-extrabold">Rs 0</div>
-<div id="out2" class="text-xs opacity-80"></div>
+<div id="out" class="text-4xl font-extrabold">Rs 7,500</div>
+<div id="out2" class="text-xs opacity-80">5 min x Rs 1500/min</div>
 </div>
 <div class="p-5 space-y-3">
 <label class="block text-sm font-bold">Video length (min) <input id="len" type="number" value="5" class="mt-1 w-full border rounded-xl p-2" /></label>
@@ -55,5 +56,8 @@ document.getElementById('break').innerHTML='Base Rs '+Math.round(base).toLocaleS
 }
 ['len','type','rev','urg'].forEach(id=>document.getElementById(id).addEventListener('input',c));document.getElementById('type').addEventListener('change',c);c();
 </script>
+<footer class="max-w-2xl mx-auto px-4 pb-8 text-xs text-gray-500 flex gap-4 justify-center border-t pt-4 mt-2">
+<a href="/" class="underline">Home</a><a href="/about" class="underline">About</a><a href="/contact" class="underline">Contact</a><a href="/privacy" class="underline">Privacy</a><a href="/affiliate-disclosure" class="underline">Disclosure</a>
+</footer>
 </body>
 </html>

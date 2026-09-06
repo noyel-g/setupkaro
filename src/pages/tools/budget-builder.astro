@@ -22,11 +22,12 @@ const items = [
 <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">INR prices</span>
 </header>
 <main class="max-w-2xl mx-auto px-4 pb-10">
-<h1 class="text-3xl font-extrabold mt-4">YouTube setup under Rs 5000?</h1>
+<div class="text-xs text-gray-500 mt-4">By Noyel G • Updated 6 Sept 2026</div>
+<h1 class="text-3xl font-extrabold mt-1">YouTube setup under Rs 5000?</h1>
 <p class="text-gray-600 mt-1">Tick what you need. Total updates live. No overspending.</p>
 
 <div class="bg-gray-900 text-white rounded-2xl px-5 py-4 mt-5 flex justify-between items-center">
-<div><div class="text-xs opacity-70">TOTAL</div><div id="total" class="text-3xl font-extrabold">Rs 0</div><div id="msg" class="text-xs opacity-80"></div></div>
+<div><div class="text-xs opacity-70">TOTAL</div><div id="total" class="text-3xl font-extrabold">Rs 1,498</div><div id="msg" class="text-xs opacity-80">Boya + Tripod starter</div></div>
 <div id="badge" class="text-xs bg-green-500 px-2 py-1 rounded-full font-bold">Under 5000 ✅</div>
 </div>
 
@@ -50,9 +51,12 @@ const items = [
 
 <div class="mt-5 text-sm leading-6 bg-white border rounded-2xl p-4">
 <h2 class="font-bold">Best combo under Rs 5000</h2>
-<p>Boya M1 Rs 999 + Tripod Rs 499 + Ring light Rs 899 = Rs 2397. Enough for Reels + YouTube. Add wireless later when you earn. Don't buy Rs 500 no-name mics - no noise cancellation for fan/traffic.</p>
+<p>Boya M1 Rs 999 + Tripod Rs 499 + Ring light Rs 899 = Rs 2397. Enough for Reels + YouTube.</p>
 </div>
 </main>
+<footer class="max-w-2xl mx-auto px-4 pb-8 text-xs text-gray-500 flex gap-4 justify-center border-t pt-4 mt-2">
+<a href="/" class="underline">Home</a><a href="/about" class="underline">About</a><a href="/contact" class="underline">Contact</a><a href="/privacy" class="underline">Privacy</a><a href="/affiliate-disclosure" class="underline">Disclosure</a>
+</footer>
 <script>
 function upd(){
 let t=0; document.querySelectorAll('.chk:checked').forEach(c=>t+=+c.dataset.price);
