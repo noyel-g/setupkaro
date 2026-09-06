@@ -1,48 +1,41 @@
 ---
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
 ---
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width" />
-<title>SetupKaro - Budget Creator & Freelancer Setup India</title>
-<meta name="description" content="Free tools + honest budget comparisons for Indian YouTubers and freelancers. Start with mobile + Rs 2000." />
-</head>
-<body class="bg-gradient-to-b from-indigo-50 to-white min-h-screen text-gray-900">
-<main class="max-w-2xl mx-auto px-4 py-10 text-center">
-<div class="text-sm bg-green-100 text-green-700 inline-block px-3 py-1 rounded-full font-bold">Made for India • Free tools</div>
-<h1 class="text-4xl font-extrabold mt-4">Start YouTube / Freelancing on a budget</h1>
-<p class="text-gray-600 mt-2">No hype. Real prices in INR. Free calculators.</p>
-<div class="grid gap-3 mt-6 text-left">
-<a href="/tools/freelance-rate-calculator" class="bg-white border shadow rounded-2xl p-4 block">
-<div class="font-bold">💰 Freelance Rate Calculator →</div>
-<div class="text-sm text-gray-600">How much to charge/hr with Upwork cut</div>
-</a>
-<a href="/tools/budget-builder" class="bg-white border shadow rounded-2xl p-4 block">
-<div class="font-bold">🎬 YouTube Budget Builder →</div>
-<div class="text-sm text-gray-600">Setup under Rs 5000 / 10000 with real prices</div>
-</a>
-<a href="/best-mic-under-2000" class="bg-white border shadow rounded-2xl p-4 block">
-<div class="font-bold">🎙️ Best Mic Under 2000 →</div>
-<div class="text-sm text-gray-600">Boya, K8 wireless - noisy room picks</div>
-</a>
-<a href="/tools/upwork-fees-calculator" class="bg-white border shadow rounded-2xl p-4 block">
-<div class="font-bold">💵 Upwork Fees Calculator 2026 →</div>
-<div class="text-sm text-gray-600">$ to INR in hand after 10% + withdrawal</div>
-</a>
-<a href="/tools/editing-rate-calculator" class="bg-white border shadow rounded-2xl p-4 block">
-<div class="font-bold">✂️ Video Editing Rate →</div>
-<div class="text-sm text-gray-600">Per minute charge for Reels / YouTube</div>
-</a>
-<a href="/hosting-for-portfolio" class="bg-white border shadow rounded-2xl p-4 block">
-<div class="font-bold">🌐 Hosting for Portfolio →</div>
-<div class="text-sm text-gray-600">Under Rs 2000/yr, renewal trap warning</div>
-</a>
-<div class="bg-gray-100 rounded-2xl p-4 text-sm text-gray-500">Next: Mic finder quiz, Fiverr vs Upwork fees</div>
+<Layout title="SetupKaro - Budget Creator & Freelancer Setup India" desc="Free tools + honest budget comparisons for Indian YouTubers and freelancers. Start with mobile + Rs 2000.">
+<main class="max-w-3xl mx-auto px-4 pb-10">
+<div class="text-center pt-10">
+<div class="text-xs font-bold bg-green-100 text-green-700 inline-block px-3 py-1 rounded-full">MADE FOR INDIA • FREE • NO LOGIN</div>
+<h1 class="text-4xl sm:text-5xl font-extrabold mt-4 tracking-tight leading-tight">Start earning with<br/>what you have.</h1>
+<p class="text-gray-600 mt-3 text-lg">Calculators + budget gear in INR. No hype.</p>
+<div class="flex gap-2 justify-center mt-4 text-xs font-bold">
+<span class="bg-white border rounded-full px-3 py-1">1 Calculate rate</span>
+<span class="bg-white border rounded-full px-3 py-1">2 Build setup</span>
+<span class="bg-white border rounded-full px-3 py-1">3 Get clients</span>
 </div>
-<footer class="mt-8 text-xs text-gray-500 flex gap-4 justify-center">
-<a href="/about" class="underline">About</a><a href="/contact" class="underline">Contact</a><a href="/privacy" class="underline">Privacy</a><a href="/affiliate-disclosure" class="underline">Disclosure</a>
-</footer>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-3 mt-8">
+<a href="/tools/freelance-rate-calculator" class="bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md block">
+<div class="text-2xl">💰</div><div class="font-bold mt-1">Freelance Rate Calculator</div><div class="text-sm text-gray-600">Hourly INR with Upwork cut</div>
+</a>
+<a href="/tools/upwork-fees-calculator" class="bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md block">
+<div class="text-2xl">💵</div><div class="font-bold mt-1">Upwork Fees 2026</div><div class="text-sm text-gray-600">$ → INR in hand</div>
+</a>
+<a href="/tools/editing-rate-calculator" class="bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md block">
+<div class="text-2xl">✂️</div><div class="font-bold mt-1">Editing Rate / Minute</div><div class="text-sm text-gray-600">Reels / YouTube / Wedding</div>
+</a>
+<a href="/tools/budget-builder" class="bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md block">
+<div class="text-2xl">🎬</div><div class="font-bold mt-1">Budget Builder 5000</div><div class="text-sm text-gray-600">Mic + light + tripod total</div>
+</a>
+</div>
+
+<div class="mt-4 grid sm:grid-cols-2 gap-3">
+<a href="/best-mic-under-2000" class="bg-gray-900 text-white rounded-2xl p-5 block">
+<div class="text-xs opacity-70 font-bold">GUIDE • 2026</div><div class="font-bold mt-1">Best Mic Under 2000 →</div><div class="text-sm opacity-70">Noisy-room picks, Boya vs K8</div>
+</a>
+<a href="/hosting-for-portfolio" class="bg-indigo-600 text-white rounded-2xl p-5 block">
+<div class="text-xs opacity-80 font-bold">PORTFOLIO • UNDER 2000/YR</div><div class="font-bold mt-1">Hosting for Portfolio →</div><div class="text-sm opacity-80">Renewal trap + free option</div>
+</a>
+</div>
 </main>
-</body>
-</html>
+</Layout>

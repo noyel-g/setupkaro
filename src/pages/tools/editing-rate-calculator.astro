@@ -1,19 +1,10 @@
 ---
-import '../../styles/global.css';
+import Layout from '../../layouts/Layout.astro';
 const title = "Video Editing Rate Calculator India - Per Minute Charge 2026";
 const desc = "How much to charge for video editing per minute in India? Reels, YouTube, wedding. With revision + urgency factor.";
 ---
-<html lang="en">
-<head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>{title}</title><meta name="description" content={desc} />
-</head>
-<body class="bg-gradient-to-b from-indigo-50 to-white min-h-screen text-gray-900">
-<header class="max-w-2xl mx-auto px-4 pt-6 flex items-center justify-between">
-<a href="/" class="font-extrabold text-indigo-700 text-lg">⚙️ SetupKaro</a>
-<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Editors India</span>
-</header>
-<main class="max-w-2xl mx-auto px-4 pb-10">
+<Layout title={title} desc={desc}>
+<main class="max-w-3xl mx-auto px-4 pb-10">
 <div class="text-xs text-gray-500 mt-4">By Noyel G • Updated 6 Sept 2026</div>
 <h1 class="text-3xl font-extrabold mt-1">Video editing: per minute charge?</h1>
 <p class="text-gray-600 mt-1">Reels edit ≠ YouTube edit. Select type, get INR.</p>
@@ -56,8 +47,5 @@ document.getElementById('break').innerHTML='Base Rs '+Math.round(base).toLocaleS
 }
 ['len','type','rev','urg'].forEach(id=>document.getElementById(id).addEventListener('input',c));document.getElementById('type').addEventListener('change',c);c();
 </script>
-<footer class="max-w-2xl mx-auto px-4 pb-8 text-xs text-gray-500 flex gap-4 justify-center border-t pt-4 mt-2">
-<a href="/" class="underline">Home</a><a href="/about" class="underline">About</a><a href="/contact" class="underline">Contact</a><a href="/privacy" class="underline">Privacy</a><a href="/affiliate-disclosure" class="underline">Disclosure</a>
-</footer>
-</body>
-</html>
+
+</Layout>

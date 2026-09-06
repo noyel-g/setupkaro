@@ -1,26 +1,17 @@
 ---
-import '../../styles/global.css';
+import Layout from '../../layouts/Layout.astro';
 const title = "Freelance Rate Calculator India (INR, Upwork Fees) - SetupKaro";
 const desc = "Calculate freelance hourly rate in INR with Upwork 10% fee for Indian beginners.";
 ---
-<html lang="en">
-<head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>{title}</title><meta name="description" content={desc} />
-</head>
-<body class="bg-gradient-to-b from-indigo-50 to-white min-h-screen text-gray-900">
-<header class="max-w-2xl mx-auto px-4 pt-6 flex items-center justify-between">
-<a href="/" class="font-extrabold text-indigo-700 text-lg">⚙️ SetupKaro</a>
-<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Free • No login</span>
-</header>
-<main class="max-w-2xl mx-auto px-4 pb-10">
+<Layout title={title} desc={desc}>
+<main class="max-w-3xl mx-auto px-4 pb-10">
 <div class="text-xs text-gray-500 mt-4">By Noyel G • Updated 6 Sept 2026 • 2 min use</div>
-<h1 class="text-3xl font-extrabold mt-1 leading-tight">How much to charge per hour?</h1>
+<h1 class="text-3xl sm:text-4xl font-extrabold mt-1 tracking-tight">How much to charge per hour?</h1>
 <p class="text-gray-600 mt-1">Made for India. Includes Upwork 10% cut + profit.</p>
 
 <div class="bg-white rounded-2xl shadow-lg border mt-5 overflow-hidden">
 <div class="bg-indigo-600 text-white px-5 py-4">
-<div class="text-xs opacity-80">YOU MUST CHARGE</div>
+<div class="text-xs opacity-80 font-bold tracking-wide">YOU MUST CHARGE</div>
 <div id="out" class="text-4xl font-extrabold">Rs 364/hr</div>
 <div id="out2" class="text-xs opacity-90 mt-1">Monthly target Rs 40,000 for 110 hrs</div>
 </div>
@@ -35,22 +26,19 @@ const desc = "Calculate freelance hourly rate in INR with Upwork 10% fee for Ind
 <label class="bg-gray-50 border rounded-xl p-3 block"><div class="text-xs font-bold">UPWORK FEE %</div><input id="fee" type="number" value="10" class="w-full bg-transparent text-xl font-bold outline-none" /></label>
 <label class="bg-gray-50 border rounded-xl p-3 block"><div class="text-xs font-bold">PROFIT %</div><input id="profit" type="number" value="20" class="w-full bg-transparent text-xl font-bold outline-none" /></label>
 </div>
-<div id="break" class="text-sm bg-gray-50 rounded-xl p-3 leading-6"></div>
+<div id="break" class="text-sm bg-gray-50 rounded-xl p-3 leading-6">Cost: <b>Rs 273</b> | +profit: <b>Rs 327</b> | After Upwork 10%: <b>Rs 364</b></div>
 </div>
 </div>
 
 <div class="bg-gray-900 text-white rounded-2xl p-5 mt-4 text-center">
 <div class="font-bold">Charging right? Now need clients.</div>
 <div class="text-sm opacity-70">Portfolio site = 3x replies</div>
-<a href="#" class="inline-block bg-yellow-400 text-black font-bold px-5 py-2 rounded-full mt-3">Portfolio guide - coming soon</a>
+<a href="/hosting-for-portfolio" class="inline-block bg-yellow-400 text-black font-bold px-5 py-2 rounded-full mt-3">Portfolio hosting guide →</a>
 </div>
 
 <details class="mt-5 bg-white rounded-xl border p-4 text-sm"><summary class="font-bold cursor-pointer">How calculation works? Example</summary><p class="mt-2 text-gray-600">30,000 / 110hrs = Rs 273 cost +20% = Rs 327. To keep 327 after 10% fee, charge 327/0.9 = Rs 363. Round to Rs 400.</p></details>
 <div class="text-sm mt-4">Related: <a href="/tools/upwork-fees-calculator" class="text-indigo-700 font-bold">Upwork fees →</a> | <a href="/tools/editing-rate-calculator" class="text-indigo-700 font-bold">Editing rate →</a> | <a href="/tools/budget-builder" class="text-indigo-700 font-bold">Budget builder →</a></div>
 </main>
-<footer class="max-w-2xl mx-auto px-4 pb-8 text-xs text-gray-500 flex gap-4 justify-center border-t pt-4 mt-2">
-<a href="/" class="underline">Home</a><a href="/about" class="underline">About</a><a href="/contact" class="underline">Contact</a><a href="/privacy" class="underline">Privacy</a><a href="/affiliate-disclosure" class="underline">Disclosure</a>
-</footer>
 <script>
 function calc(){
 const e=+document.getElementById('exp').value||0;
@@ -66,5 +54,4 @@ document.getElementById('break').innerHTML='Cost: <b>Rs '+Math.round(cost)+'</b>
 }
 ['exp','hrs','days','fee','profit'].forEach(id=>document.getElementById(id).addEventListener('input',calc));calc();
 </script>
-</body>
-</html>
+</Layout>

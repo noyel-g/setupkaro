@@ -1,14 +1,13 @@
 ---
-import '../styles/global.css';
+const title = "SetupKaro";
+const desc = "SetupKaro";
+import Layout from '../layouts/Layout.astro';
 ---
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Affiliate Disclosure - SetupKaro</title></head>
-<body class="bg-white text-gray-900"><main class="max-w-2xl mx-auto px-4 py-8">
+<Layout title={title} desc={desc}>
+<main class="max-w-3xl mx-auto px-4 py-8">
 <a href="/" class="text-indigo-700 font-bold text-sm">← SetupKaro</a>
 <h1 class="text-3xl font-extrabold mt-2">Affiliate Disclosure</h1>
 <p class="mt-3 leading-7">SetupKaro is reader-supported. Some buttons/links are affiliate links (Amazon, Flipkart via Cuelinks/EarnKaro, Hostinger). If you buy through them, we may earn a commission at no extra cost to you. Prices in INR are checked manually and change daily - always check live price on store page.</p>
 <p class="mt-2 text-sm">Last updated: 6 Sept 2026. Contact: hello@setupkaro.in</p>
 </main>
-<footer class="max-w-2xl mx-auto px-4 pb-8 text-xs text-gray-500 flex gap-4 justify-center border-t pt-4 mt-2">
-<a href="/" class="underline">Home</a><a href="/about" class="underline">About</a><a href="/contact" class="underline">Contact</a><a href="/privacy" class="underline">Privacy</a><a href="/affiliate-disclosure" class="underline">Disclosure</a>
-</footer></body></html>
+</Layout>
