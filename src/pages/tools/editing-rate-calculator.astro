@@ -1,0 +1,59 @@
+---
+import '../../styles/global.css';
+const title = "Video Editing Rate Calculator India - Per Minute Charge 2026";
+const desc = "How much to charge for video editing per minute in India? Reels, YouTube, wedding. With revision + urgency factor.";
+---
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title}</title><meta name="description" content={desc} />
+</head>
+<body class="bg-gradient-to-b from-indigo-50 to-white min-h-screen text-gray-900">
+<header class="max-w-2xl mx-auto px-4 pt-6 flex items-center justify-between">
+<a href="/" class="font-extrabold text-indigo-700 text-lg">⚙️ SetupKaro</a>
+<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Editors India</span>
+</header>
+<main class="max-w-2xl mx-auto px-4 pb-10">
+<h1 class="text-3xl font-extrabold mt-4">Video editing: per minute charge?</h1>
+<p class="text-gray-600 mt-1">Reels edit ≠ YouTube edit. Select type, get INR.</p>
+<div class="bg-white rounded-2xl shadow-lg border mt-5 overflow-hidden">
+<div class="bg-gray-900 text-white px-5 py-4">
+<div class="text-xs opacity-70">QUOTE TO CLIENT</div>
+<div id="out" class="text-4xl font-extrabold">Rs 0</div>
+<div id="out2" class="text-xs opacity-80"></div>
+</div>
+<div class="p-5 space-y-3">
+<label class="block text-sm font-bold">Video length (min) <input id="len" type="number" value="5" class="mt-1 w-full border rounded-xl p-2" /></label>
+<label class="block text-sm font-bold">Type
+<select id="type" class="mt-1 w-full border rounded-xl p-2">
+<option value="800">Reels/Shorts - Rs 800/min</option>
+<option value="1500" selected>YouTube vlog - Rs 1500/min</option>
+<option value="2500">Wedding/cinematic - Rs 2500/min</option>
+<option value="500">Raw cut only - Rs 500/min</option>
+</select></label>
+<div class="grid grid-cols-2 gap-3">
+<label class="block text-sm font-bold">Revisions <input id="rev" type="number" value="2" class="mt-1 w-full border rounded-xl p-2" /></label>
+<label class="block text-sm font-bold">Urgent? <select id="urg" class="mt-1 w-full border rounded-xl p-2"><option value="1">No</option><option value="1.5">Yes 24hr (+50%)</option></select></label>
+</div>
+<div id="break" class="text-sm bg-gray-50 rounded-xl p-3"></div>
+</div>
+</div>
+<div class="text-sm bg-white border rounded-2xl p-4 mt-4">Beginner range India 2026: Reels Rs 500-1000/min, YouTube Rs 1200-2000/min, Wedding Rs 2000-4000/min. Charge per project, not hour - client understands minute. Add 25% per extra revision after 2.<br/><br/><a href="/tools/freelance-rate-calculator" class="text-indigo-700 font-bold">Check hourly floor →</a></div>
+</main>
+<script>
+function c(){
+const l=+document.getElementById('len').value||0;
+const t=+document.getElementById('type').value||0;
+const r=+document.getElementById('rev').value||0;
+const u=+document.getElementById('urg').value||1;
+let base=l*t;
+let extra=r>2?(r-2)*0.25*base:0;
+let total=(base+extra)*u;
+document.getElementById('out').innerText='Rs '+Math.round(total).toLocaleString('en-IN');
+document.getElementById('out2').innerText=l+' min x Rs '+t+'/min';
+document.getElementById('break').innerHTML='Base Rs '+Math.round(base).toLocaleString('en-IN')+' + revisions Rs '+Math.round(extra).toLocaleString('en-IN')+' x urgency '+u+'x';
+}
+['len','type','rev','urg'].forEach(id=>document.getElementById(id).addEventListener('input',c));document.getElementById('type').addEventListener('change',c);c();
+</script>
+</body>
+</html>
