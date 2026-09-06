@@ -1,54 +1,50 @@
 ---
 const title = "Freelance Rate Calculator India (INR, Upwork Fees) - SetupKaro";
-const desc = "Calculate your freelance hourly rate in INR with Upwork 10% fee, monthly expenses and hours. Made for Indian beginners.";
+const desc = "Calculate freelance hourly rate in INR with Upwork 10% fee for Indian beginners.";
 ---
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>{title}</title>
-<meta name="description" content={desc} />
-<script type="application/ld+json">
-{JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much should a beginner freelancer charge in India?","acceptedAnswer":{"@type":"Answer","text":"Rs 300-800/hr for editing/design/writing. Calculate expenses/hours first, then add 20% profit."}},{"@type":"Question","name":"What is Upwork fee in India?","acceptedAnswer":{"@type":"Answer","text":"10% flat on most contracts now. Our calculator deducts it automatically."}},{"@type":"Question","name":"How to convert USD rate to INR?","acceptedAnswer":{"@type":"Answer","text":"Multiply USD by 83 and minus 10% fee and PayPal/Wise cut ~4%."}}]})}
-</script>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title}</title><meta name="description" content={desc} />
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 text-gray-900">
-<main class="max-w-2xl mx-auto p-4">
-<a href="/" class="text-sm text-blue-600">← SetupKaro</a>
-<h1 class="text-2xl font-bold mt-2">Freelance Rate Calculator India</h1>
-<p class="text-gray-600 mt-1">Hourly rate in INR with Upwork cut. For beginners with mobile/laptop.</p>
+<body class="bg-gradient-to-b from-indigo-50 to-white min-h-screen text-gray-900">
+<header class="max-w-2xl mx-auto px-4 pt-6 flex items-center justify-between">
+<a href="/" class="font-extrabold text-indigo-700 text-lg">⚙️ SetupKaro</a>
+<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Free • No login</span>
+</header>
+<main class="max-w-2xl mx-auto px-4 pb-10">
+<h1 class="text-3xl font-extrabold mt-4 leading-tight">How much to charge per hour?</h1>
+<p class="text-gray-600 mt-1">Made for India. Includes Upwork 10% cut + profit.</p>
 
-<div class="bg-white p-4 rounded-xl shadow mt-4 space-y-3">
-<label class="block">Monthly expenses Rs<input id="exp" type="number" value="30000" class="mt-1 w-full border rounded p-2" /></label>
+<div class="bg-white rounded-2xl shadow-lg border mt-5 overflow-hidden">
+<div class="bg-indigo-600 text-white px-5 py-4">
+<div class="text-xs opacity-80">YOU MUST CHARGE</div>
+<div id="out" class="text-4xl font-extrabold">Rs 0/hr</div>
+<div id="out2" class="text-xs opacity-90 mt-1"></div>
+</div>
+<div class="p-5 space-y-4">
+<label class="block"><div class="flex justify-between text-sm font-semibold"><span>Monthly expenses</span><span id="v-exp" class="text-indigo-600">Rs 30,000</span></div>
+<input id="exp" type="range" min="5000" max="150000" step="1000" value="30000" class="w-full accent-indigo-600" /></label>
 <div class="grid grid-cols-2 gap-3">
-<label class="block">Hours/day<input id="hrs" type="number" value="5" class="mt-1 w-full border rounded p-2" /></label>
-<label class="block">Days/month<input id="days" type="number" value="22" class="mt-1 w-full border rounded p-2" /></label>
+<label class="bg-gray-50 border rounded-xl p-3 block"><div class="text-xs font-bold">HOURS / DAY</div><input id="hrs" type="number" value="5" class="w-full bg-transparent text-xl font-bold outline-none" /></label>
+<label class="bg-gray-50 border rounded-xl p-3 block"><div class="text-xs font-bold">DAYS / MONTH</div><input id="days" type="number" value="22" class="w-full bg-transparent text-xl font-bold outline-none" /></label>
 </div>
 <div class="grid grid-cols-2 gap-3">
-<label class="block">Upwork fee %<input id="fee" type="number" value="10" class="mt-1 w-full border rounded p-2" /></label>
-<label class="block">Profit %<input id="profit" type="number" value="20" class="mt-1 w-full border rounded p-2" /></label>
+<label class="bg-gray-50 border rounded-xl p-3 block"><div class="text-xs font-bold">UPWORK FEE %</div><input id="fee" type="number" value="10" class="w-full bg-transparent text-xl font-bold outline-none" /></label>
+<label class="bg-gray-50 border rounded-xl p-3 block"><div class="text-xs font-bold">PROFIT %</div><input id="profit" type="number" value="20" class="w-full bg-transparent text-xl font-bold outline-none" /></label>
 </div>
-<div class="bg-green-50 p-3 rounded">
-<div class="text-sm">You must charge:</div>
-<div id="out" class="text-3xl font-bold">Rs 0/hr</div>
-<div id="out2" class="text-sm text-gray-700"></div>
+<div id="break" class="text-sm bg-gray-50 rounded-xl p-3 leading-6"></div>
 </div>
 </div>
 
-<div class="bg-blue-600 text-white p-4 rounded-xl mt-4 text-center">
-<div class="font-bold">Next: Make portfolio to get clients</div>
-<a href="#" class="inline-block bg-white text-blue-700 px-4 py-2 rounded mt-2 font-bold">Coming soon</a>
+<div class="bg-gray-900 text-white rounded-2xl p-5 mt-4 text-center">
+<div class="font-bold">Charging right? Now need clients.</div>
+<div class="text-sm opacity-70">Portfolio site = 3x replies</div>
+<a href="#" class="inline-block bg-yellow-400 text-black font-bold px-5 py-2 rounded-full mt-3">Portfolio guide - coming soon</a>
 </div>
 
-<div class="mt-6 text-sm leading-6">
-<h2 class="font-bold text-lg">How to use</h2>
-<p>Example: Rs 30000 expenses / (5hrs x 22 days=110hrs) = Rs 273/hr cost. +20% profit = Rs 327/hr. After 10% Upwork cut you need Rs 363/hr to take home Rs 327. Round to Rs 400/hr for beginners.</p>
-<h2 class="font-bold text-lg mt-3">FAQ</h2>
-<p><b>Beginner rate?</b> Rs 300-800/hr. Start 400, raise after 5 reviews.</p>
-<p><b>Upwork fee?</b> 10% flat now.</p>
-<p><b>USD to INR?</b> $10/hr x 83 = Rs 830 -10% = Rs 747 in hand.</p>
-</div>
+<details class="mt-5 bg-white rounded-xl border p-4 text-sm"><summary class="font-bold cursor-pointer">How calculation works? Example</summary><p class="mt-2 text-gray-600">30,000 / 110hrs = Rs 273 cost +20% = Rs 327. To keep 327 after 10% fee, charge 327/0.9 = Rs 363. Round to Rs 400.</p></details>
 </main>
 <script>
 function calc(){
@@ -57,12 +53,11 @@ const h=+document.getElementById('hrs').value||1;
 const d=+document.getElementById('days').value||1;
 const f=+document.getElementById('fee').value||0;
 const p=+document.getElementById('profit').value||0;
-const hrs=h*d||1;
-const cost=e/hrs;
-const withProfit=cost*(1+p/100);
-const charge=withProfit/(1-f/100);
-document.getElementById('out').innerText='Rs '+Math.round(charge).toLocaleString('en-IN')+'/hr';
-document.getElementById('out2').innerText='Cost Rs '+Math.round(cost)+'/hr | With profit Rs '+Math.round(withProfit)+'/hr | Monthly target Rs '+Math.round(charge*hrs).toLocaleString('en-IN');
+document.getElementById('v-exp').innerText='Rs '+e.toLocaleString('en-IN');
+const hrs=h*d||1; const cost=e/hrs; const withP=cost*(1+p/100); const ch=withP/(1-f/100);
+document.getElementById('out').innerText='Rs '+Math.round(ch).toLocaleString('en-IN')+'/hr';
+document.getElementById('out2').innerText='Monthly target Rs '+Math.round(ch*hrs).toLocaleString('en-IN')+' for '+hrs+' hrs';
+document.getElementById('break').innerHTML='Cost: <b>Rs '+Math.round(cost)+'</b> | +profit: <b>Rs '+Math.round(withP)+'</b> | After Upwork '+f+'%: <b>Rs '+Math.round(ch)+'</b>';
 }
 ['exp','hrs','days','fee','profit'].forEach(id=>document.getElementById(id).addEventListener('input',calc));calc();
 </script>
