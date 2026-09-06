@@ -1,39 +1,35 @@
 ---
 import Layout from '../layouts/Layout.astro';
 const tools = [
-  { href: '/tools/freelance-rate-calculator', icon: '🧮', name: 'Freelance Rate Calculator', sub: 'Know your hourly rate' },
-  { href: '/tools/upwork-fees-calculator', icon: '$', name: 'Upwork Fees Calculator', sub: '$ to INR in hand' },
-  { href: '/tools/editing-rate-calculator', icon: '✂️', name: 'Editing Rate / Minute', sub: 'Price your editing work' },
-  { href: '/tools/budget-builder', icon: '🎬', name: 'YouTube Setup Under ₹5000', sub: 'Starter gear checklist' },
-  { href: '/best-mic-under-2000', icon: '🎙️', name: 'Best Mic Under ₹2000', sub: 'Noisy-room picks' },
-  { href: '/hosting-for-portfolio', icon: '🌐', name: 'Hosting for Portfolio', sub: 'Under ₹2000/yr guide' },
+  { href: '/tools/freelance-rate-calculator', cat: 'EARN', name: 'Freelance Rate Calculator', sub: 'Know what to charge per hour in INR, with Upwork cut included.' },
+  { href: '/tools/upwork-fees-calculator', cat: 'EARN', name: 'Upwork Fees Calculator', sub: 'See your actual INR payout after fees.' },
+  { href: '/tools/editing-rate-calculator', cat: 'EARN', name: 'Editing Rate Calculator', sub: 'Price video editing work per minute.' },
+  { href: '/tools/youtube-setup-under-5000', cat: 'CREATE', name: 'YouTube Setup Under ₹5000', sub: 'Starter gear checklist with real prices.' },
+  { href: '/guides/best-mic-under-2000', cat: 'CREATE', name: 'Best Mic Under ₹2000', sub: 'Tested in a noisy room. What I actually bought.' },
+  { href: '/guides/hosting-for-portfolio', cat: 'BUILD', name: 'Hosting for Portfolio', sub: 'Portfolio hosting under ₹2000/yr, renewal traps explained.' },
 ];
 ---
-<Layout title="SetupKaro - Practical tools for creators & freelancers" desc="Simple calculators, buying guides and resources — made for India.">
+<Layout title="Freelance Rate Calculator India, Upwork Fees & Budget Setup Guides - SetupKaro" desc="Free freelance rate calculator India, Upwork fees calculator in INR, video editing rates and budget YouTube setup guides. Built for Indian creators and freelancers.">
 <main class="max-w-5xl mx-auto px-4 pb-10" id="tools">
-<div class="bg-white rounded-3xl border mt-4 p-6 sm:p-10">
-<h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">Practical tools<br/>for creators &<br/>freelancers.</h1>
-<p class="text-gray-600 mt-3">Simple calculators, buying guides and resources — made for India.</p>
-<div class="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm text-gray-700 font-medium">
-<span>⚡ Free to use</span><span>📍 Made for India</span><span>👤 No login</span>
+<div class="bg-white rounded-2xl border mt-4 p-6 sm:p-8">
+<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Useful tools for getting work done.</h1>
+<p class="text-gray-600 mt-2">Calculators, guides and resources for creators and freelancers in India.</p>
+<p class="text-sm text-gray-500 mt-1">Free to use &nbsp;•&nbsp; Made for India &nbsp;•&nbsp; No login</p>
+<div class="mt-4 relative max-w-xl">
+<input id="q" type="search" placeholder="Search tools, guides and calculators..." class="w-full border rounded-full py-2.5 pl-10 pr-4 text-sm outline-none focus:border-indigo-500" />
+<span class="absolute left-4 top-2.5 text-gray-400">🔍</span>
 </div>
-<div class="mt-5 relative">
-<input id="q" type="search" placeholder="Search tools, guides..." class="w-full border rounded-full py-3 pl-10 pr-12 text-sm outline-none focus:border-indigo-500" />
-<span class="absolute left-4 top-3.5 text-gray-400">🔍</span>
-</div>
-<div class="flex items-center justify-between mt-8 mb-3">
-<div class="font-bold">Popular tools</div>
-<span class="text-xs text-gray-500">View all →</span>
-</div>
-<div id="grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+<div class="font-bold mt-7 mb-3">Popular tools</div>
+<div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
 {tools.map((t) => (
-<a href={t.href} data-name={(t.name + ' ' + t.sub).toLowerCase()} class="tool-card bg-[#f8f9fb] border rounded-2xl p-4 flex gap-3 items-start hover:border-indigo-400 hover:shadow-sm">
-<span class="text-2xl bg-white border rounded-xl w-11 h-11 flex items-center justify-center shrink-0 font-bold">{t.icon}</span>
-<span><span class="font-bold text-sm block leading-snug">{t.name}</span><span class="text-xs text-gray-500">{t.sub}</span></span>
+<a href={t.href} data-name={(t.name + ' ' + t.sub).toLowerCase()} class="tool-card bg-white border border-[#E5E5E5] rounded-xl p-5 block hover:border-gray-400">
+<span class="text-[11px] font-bold tracking-wide text-indigo-600">{t.cat}</span>
+<span class="font-semibold block mt-1 leading-snug">{t.name}</span>
+<span class="text-sm text-gray-600 block mt-1">{t.sub}</span>
+<span class="text-sm font-semibold text-gray-900 block mt-3">Open →</span>
 </a>
 ))}
 </div>
-<blockquote class="mt-8 text-gray-600 text-lg">❝ <i>Simple tools for real people building a better future.</i> ❞<div class="text-sm mt-1">— Noyel G</div></blockquote>
 </div>
 </main>
 <script>

@@ -41,7 +41,11 @@ const desc = "Find how much to charge per hour based on your expenses, work hour
 <div class="bg-[#f8f9fb] border rounded-2xl p-4 mt-4 text-sm flex gap-2">
 <span>💡</span><span><b>Tip:</b> Adjust profit % based on your goals and savings. You can always charge more for specialised skills.</span>
 </div>
-<div class="text-sm mt-4">Related: <a href="/tools/upwork-fees-calculator" class="text-indigo-700 font-bold">Upwork fees →</a> | <a href="/tools/editing-rate-calculator" class="text-indigo-700 font-bold">Editing rate →</a></div>
+<div class="text-sm mt-4">Related: <a href="/tools/upwork-fees-calculator" class="text-indigo-700 font-bold">Upwork fees →</a> | <a href="/tools/editing-rate-calculator" class="text-indigo-700 font-bold">Editing rate →</a> | <a href="/tools/youtube-setup-under-5000" class="text-indigo-700 font-bold">Setup builder →</a></div>
+<div class="mt-3 flex items-center gap-2">
+<button id="share" class="text-sm font-bold border rounded-full px-4 py-2 hover:border-indigo-500">Copy result link</button>
+<span id="shareMsg" class="text-xs text-green-600"></span>
+</div>
 </div>
 </div>
 </main>
@@ -63,6 +67,11 @@ document.getElementById('c3').innerText='₹'+Math.round(ch).toLocaleString('en-
 }
 ['exp','hrs','days','fee','profit'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 document.getElementById('expN').addEventListener('input',()=>{document.getElementById('exp').value=document.getElementById('expN').value||0;calc();});
-calc();
+(function(){const q=new URLSearchParams(location.search);['exp','hrs','days','fee','profit'].forEach(id=>{const v=+q.get(id);if(v>0)document.getElementById(id).value=v;});document.getElementById('expN').value=document.getElementById('exp').value;calc();})();
+document.getElementById('share').addEventListener('click',()=>{
+const p=new URLSearchParams({exp:document.getElementById('exp').value,hrs:document.getElementById('hrs').value,days:document.getElementById('days').value,fee:document.getElementById('fee').value,profit:document.getElementById('profit').value});
+const link=location.origin+location.pathname+'?'+p.toString();
+if(navigator.clipboard){navigator.clipboard.writeText(link).then(()=>{document.getElementById('shareMsg').innerText='Link copied ✓';});}else{prompt('Copy your result link:',link);}
+});
 </script>
 </Layout>

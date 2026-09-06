@@ -42,6 +42,10 @@ const desc = "Reels edit ≠ YouTube edit. Select type, get your price in INR.";
 <div class="bg-[#f8f9fb] border rounded-2xl p-4 mt-4 text-sm flex gap-2">
 <span>ⓘ</span><span><b>Tip:</b> Charge per project, not per hour. Factor in revisions and your experience.</span>
 </div>
+<div class="mt-3 flex items-center gap-2">
+<button id="share" class="text-sm font-bold border rounded-full px-4 py-2 hover:border-indigo-500">Copy result link</button>
+<span id="shareMsg" class="text-xs text-green-600"></span>
+</div>
 </div>
 </div>
 </main>
@@ -60,6 +64,12 @@ document.getElementById('break').innerText='Base ₹'+Math.round(base).toLocaleS
 }
 ['len','rev','urg'].forEach(id=>document.getElementById(id).addEventListener('change',c));
 ['len'].forEach(id=>document.getElementById(id).addEventListener('input',c));
-document.getElementById('type').addEventListener('change',c);c();
+document.getElementById('type').addEventListener('change',c);
+(function(){const q=new URLSearchParams(location.search);const l=+q.get('len');if(l>0)document.getElementById('len').value=l;const t=+q.get('type');if(t>0)document.getElementById('type').value=t;c();})();
+document.getElementById('share').addEventListener('click',()=>{
+const p=new URLSearchParams({len:document.getElementById('len').value,type:document.getElementById('type').value});
+const link=location.origin+location.pathname+'?'+p.toString();
+if(navigator.clipboard){navigator.clipboard.writeText(link).then(()=>{document.getElementById('shareMsg').innerText='Link copied ✓';});}else{prompt('Copy your result link:',link);}
+});
 </script>
 </Layout>
