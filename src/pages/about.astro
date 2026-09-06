@@ -1,14 +1,26 @@
 ---
-const title = "SetupKaro";
-const desc = "SetupKaro";
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title={title} desc={desc}>
-<main class="max-w-3xl mx-auto px-4 py-8">
-<a href="/" class="text-indigo-700 font-bold text-sm">← SetupKaro</a>
-<h1 class="text-3xl font-extrabold mt-2">About SetupKaro</h1>
-<p class="mt-3 leading-7">SetupKaro.in is a budget toolkit for Indian creators and freelancers. We build free calculators (freelance rate, Upwork fees, YouTube budget builder) and test budget gear for noisy Indian rooms - fan, traffic, small rooms.</p>
-<p class="mt-2 leading-7">Why: most “best” lists show US prices. We show INR, OTG issues on Xiaomi/Realme, and real total under Rs 5000.</p>
-<p class="mt-2 text-sm text-gray-600">Run by Noyel G, India. Contact: setupkaro.in/contact. Updated Sept 2026.</p>
+<Layout title="About SetupKaro" desc="Practical tools and guides to help creators, freelancers and first-time builders in India.">
+<main class="max-w-5xl mx-auto px-4 pb-10">
+<div class="bg-white rounded-3xl border mt-4 p-6 sm:p-8">
+<div class="text-xs text-gray-500">About › About</div>
+<h1 class="text-2xl sm:text-3xl font-extrabold mt-1">About SetupKaro</h1>
+<p class="text-sm text-gray-600 mt-1">Practical tools and guides to help creators, freelancers and first-time builders in India.</p>
+
+<div class="border rounded-2xl p-4 mt-4 flex gap-3 items-start max-w-xl">
+<span class="bg-indigo-100 text-indigo-700 font-extrabold text-xl w-11 h-11 flex items-center justify-center rounded-full shrink-0">N</span>
+<div class="text-sm"><b>Built by Noyel G</b><div class="text-gray-600">Engineer • Creator • Learner<br/>I build simple tools and write practical guides based on real experience. No fluff. Just what works.</div></div>
+</div>
+
+<div class="font-bold mt-6 mb-2">Why SetupKaro?</div>
+<div class="grid sm:grid-cols-3 gap-3 max-w-2xl">
+<div class="border rounded-2xl p-4 text-sm"><div class="text-xl">⚡</div><b>Simple & practical</b><div class="text-gray-600 text-xs mt-1">No jargon, no hype.</div></div>
+<div class="border rounded-2xl p-4 text-sm"><div class="text-xl">❤️</div><b>Made for India</b><div class="text-gray-600 text-xs mt-1">Prices in INR, real recommendations.</div></div>
+<div class="border rounded-2xl p-4 text-sm"><div class="text-xl">👥</div><b>For creators & freelancers</b><div class="text-gray-600 text-xs mt-1">Tools to help you start, grow and earn.</div></div>
+</div>
+
+<blockquote class="mt-6 text-gray-600">❝ <i>Better tools. More people building things they love.</i> ❞<div class="text-sm mt-1">— Noyel G</div></blockquote>
+</div>
 </main>
 </Layout>

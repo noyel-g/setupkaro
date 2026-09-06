@@ -1,36 +1,49 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-const title = "Video Editing Rate Calculator India - Per Minute Charge 2026";
-const desc = "How much to charge for video editing per minute in India? Reels, YouTube, wedding. With revision + urgency factor.";
+const title = "Editing Rate Calculator - SetupKaro";
+const desc = "Reels edit ≠ YouTube edit. Select type, get your price in INR.";
 ---
-<Layout title={title} desc={desc}>
-<main class="max-w-3xl mx-auto px-4 pb-10">
-<div class="text-xs text-gray-500 mt-4">By Noyel G • Updated 6 Sept 2026</div>
-<h1 class="text-3xl font-extrabold mt-1">Video editing: per minute charge?</h1>
-<p class="text-gray-600 mt-1">Reels edit ≠ YouTube edit. Select type, get INR.</p>
-<div class="bg-white rounded-2xl shadow-lg border mt-5 overflow-hidden">
-<div class="bg-gray-900 text-white px-5 py-4">
-<div class="text-xs opacity-70">QUOTE TO CLIENT</div>
-<div id="out" class="text-4xl font-extrabold">Rs 7,500</div>
-<div id="out2" class="text-xs opacity-80">5 min x Rs 1500/min</div>
-</div>
-<div class="p-5 space-y-3">
-<label class="block text-sm font-bold">Video length (min) <input id="len" type="number" value="5" class="mt-1 w-full border rounded-xl p-2" /></label>
-<label class="block text-sm font-bold">Type
-<select id="type" class="mt-1 w-full border rounded-xl p-2">
-<option value="800">Reels/Shorts - Rs 800/min</option>
-<option value="1500" selected>YouTube vlog - Rs 1500/min</option>
-<option value="2500">Wedding/cinematic - Rs 2500/min</option>
-<option value="500">Raw cut only - Rs 500/min</option>
+<Layout title={title} desc={desc} crumbs={[{label:'Home',href:'/'},{label:'Tools',href:'/#tools'},{label:'Editing Rate Calculator'}]}>
+<main class="max-w-5xl mx-auto px-4 pb-10">
+<div class="bg-white rounded-3xl border mt-4 p-6 sm:p-8">
+<div class="text-xs text-gray-500">By Noyel G • Updated 6 Sept 2026</div>
+<h1 class="text-2xl sm:text-3xl font-extrabold mt-1">Video editing: per minute charge?</h1>
+<p class="text-sm text-gray-600 mt-1">Reels edit ≠ YouTube edit. Select type, get your price in INR.</p>
+
+<div class="mt-5 max-w-xl border rounded-2xl p-5">
+<label class="text-sm font-semibold block">Video length (minutes)<input id="len" type="number" value="5" class="mt-1 w-full border rounded-xl p-2.5 font-semibold" /></label>
+<label class="text-sm font-semibold block mt-3">Type
+<select id="type" class="mt-1 w-full border rounded-xl p-2.5 bg-white">
+<option value="800">YouTube vlog - ₹1500/min</option>
+<option value="1500" selected>YouTube vlog - ₹1500/min</option>
+<option value="2500">Wedding / cinematic - ₹2500/min</option>
+<option value="800">Reels / Shorts - ₹800/min</option>
+<option value="500">Raw cut only - ₹500/min</option>
 </select></label>
-<div class="grid grid-cols-2 gap-3">
-<label class="block text-sm font-bold">Revisions <input id="rev" type="number" value="2" class="mt-1 w-full border rounded-xl p-2" /></label>
-<label class="block text-sm font-bold">Urgent? <select id="urg" class="mt-1 w-full border rounded-xl p-2"><option value="1">No</option><option value="1.5">Yes 24hr (+50%)</option></select></label>
+<div class="grid grid-cols-2 gap-3 mt-3">
+<label class="text-sm font-semibold block">Revisions
+<select id="rev" class="mt-1 w-full border rounded-xl p-2.5 bg-white"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></label>
+<label class="text-sm font-semibold block">Urgent?
+<select id="urg" class="mt-1 w-full border rounded-xl p-2.5 bg-white"><option value="1">No</option><option value="1.5">Yes, 24hr (+50%)</option></select></label>
 </div>
-<div id="break" class="text-sm bg-gray-50 rounded-xl p-3"></div>
+
+<div class="bg-[#f4f4f5] rounded-2xl p-5 mt-4 flex items-center justify-between">
+<div><div class="text-sm text-gray-600">Quote to client</div>
+<div id="out" class="text-4xl font-extrabold">₹ 7,500</div>
+<div id="out2" class="text-sm text-gray-600">5 min × ₹1500/min</div></div>
+<span class="text-2xl bg-white rounded-full w-11 h-11 flex items-center justify-center">✂️</span>
+</div>
+
+<details class="mt-4 border rounded-2xl p-4 text-sm">
+<summary class="font-bold cursor-pointer flex items-center gap-2">✂️ How this is calculated? <span class="ml-auto">⌄</span></summary>
+<p id="break" class="mt-2 text-gray-600">Base ₹7,500 + revisions ₹0 × urgency 1x</p>
+</details>
+
+<div class="bg-[#f8f9fb] border rounded-2xl p-4 mt-4 text-sm flex gap-2">
+<span>ⓘ</span><span><b>Tip:</b> Charge per project, not per hour. Factor in revisions and your experience.</span>
 </div>
 </div>
-<div class="text-sm bg-white border rounded-2xl p-4 mt-4">Beginner range India 2026: Reels Rs 500-1000/min, YouTube Rs 1200-2000/min, Wedding Rs 2000-4000/min. Charge per project, not hour - client understands minute. Add 25% per extra revision after 2.<br/><br/><a href="/tools/freelance-rate-calculator" class="text-indigo-700 font-bold">Check hourly floor →</a></div>
+</div>
 </main>
 <script>
 function c(){
@@ -41,11 +54,12 @@ const u=+document.getElementById('urg').value||1;
 let base=l*t;
 let extra=r>2?(r-2)*0.25*base:0;
 let total=(base+extra)*u;
-document.getElementById('out').innerText='Rs '+Math.round(total).toLocaleString('en-IN');
-document.getElementById('out2').innerText=l+' min x Rs '+t+'/min';
-document.getElementById('break').innerHTML='Base Rs '+Math.round(base).toLocaleString('en-IN')+' + revisions Rs '+Math.round(extra).toLocaleString('en-IN')+' x urgency '+u+'x';
+document.getElementById('out').innerText='₹ '+Math.round(total).toLocaleString('en-IN');
+document.getElementById('out2').innerText=l+' min × ₹'+t+'/min';
+document.getElementById('break').innerText='Base ₹'+Math.round(base).toLocaleString('en-IN')+' + revisions ₹'+Math.round(extra).toLocaleString('en-IN')+' × urgency '+u+'x';
 }
-['len','type','rev','urg'].forEach(id=>document.getElementById(id).addEventListener('input',c));document.getElementById('type').addEventListener('change',c);c();
+['len','rev','urg'].forEach(id=>document.getElementById(id).addEventListener('change',c));
+['len'].forEach(id=>document.getElementById(id).addEventListener('input',c));
+document.getElementById('type').addEventListener('change',c);c();
 </script>
-
 </Layout>

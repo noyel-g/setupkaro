@@ -1,35 +1,42 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-const title = "Upwork Fees Calculator India 2026 - How Much You Keep in INR";
-const desc = "Upwork 10% fee + GST + withdrawal to India. Enter $ rate, see INR in hand with 2026 fees.";
+const title = "Upwork Fees Calculator (India) - SetupKaro";
+const desc = "See how much you'll actually get in INR after Upwork fees and withdrawal charges.";
 ---
-<Layout title={title} desc={desc}>
-<main class="max-w-3xl mx-auto px-4 pb-10">
-<div class="text-xs text-gray-500 mt-4">By Noyel G • Updated 6 Sept 2026</div>
-<h1 class="text-3xl font-extrabold mt-1">Upwork fees calculator India</h1>
-<p class="text-gray-600 mt-1">$ to INR in hand after 10% Upwork + withdrawal.</p>
-<div class="bg-white rounded-2xl shadow-lg border mt-5 overflow-hidden">
-<div class="bg-gray-900 text-white px-5 py-4">
-<div class="text-xs opacity-70">YOU GET IN BANK</div>
-<div id="out" class="text-4xl font-extrabold">Rs 21,514</div>
-<div id="out2" class="text-xs opacity-80 mt-1">$300 billed → Rs 24,900 gross</div>
+<Layout title={title} desc={desc} crumbs={[{label:'Home',href:'/'},{label:'Tools',href:'/#tools'},{label:'Upwork Fees Calculator'}]}>
+<main class="max-w-5xl mx-auto px-4 pb-10">
+<div class="bg-white rounded-3xl border mt-4 p-6 sm:p-8">
+<div class="text-xs text-gray-500">By Noyel G • Updated 6 Sept 2026</div>
+<h1 class="text-2xl sm:text-3xl font-extrabold mt-1">Upwork fees calculator (India)</h1>
+<p class="text-sm text-gray-600 mt-1">See how much you'll actually get in INR after Upwork fees and withdrawal charges.</p>
+
+<div class="mt-5 max-w-xl">
+<label class="text-sm font-semibold block">Hourly rate (USD)</label>
+<div class="relative mt-1"><span class="absolute left-3 top-2.5 text-gray-500">$</span><input id="usd" type="number" value="15" class="w-full border rounded-xl p-2.5 pl-7 font-semibold" /></div>
+<div class="grid grid-cols-2 gap-3 mt-3">
+<label class="text-sm font-semibold block">Hours<input id="hrs" type="number" value="20" class="mt-1 w-full border rounded-xl p-2.5 font-semibold" /></label>
+<label class="text-sm font-semibold block">$ to INR<input id="rate" type="number" value="83" class="mt-1 w-full border rounded-xl p-2.5 font-semibold" /></label>
+<label class="text-sm font-semibold block">Upwork fee %<input id="fee" type="number" value="10" class="mt-1 w-full border rounded-xl p-2.5 font-semibold" /></label>
+<label class="text-sm font-semibold block">Withdrawal fee %<input id="wd" type="number" value="4" class="mt-1 w-full border rounded-xl p-2.5 font-semibold" /></label>
 </div>
-<div class="p-5 space-y-4">
-<label class="block text-sm font-bold">Hourly rate $ <input id="usd" type="number" value="15" class="mt-1 w-full border rounded-xl p-2 text-xl font-bold" /></label>
-<div class="grid grid-cols-2 gap-3">
-<label class="block text-sm font-bold">Hours <input id="hrs" type="number" value="20" class="mt-1 w-full border rounded-xl p-2" /></label>
-<label class="block text-sm font-bold">$ to Rs <input id="rate" type="number" value="83" class="mt-1 w-full border rounded-xl p-2" /></label>
+
+<div class="bg-[#eef4ff] rounded-2xl p-5 mt-5 flex items-center justify-between">
+<div><div class="text-sm text-gray-600">You get in bank</div>
+<div id="out" class="text-4xl font-extrabold">₹ 21,514</div>
+<div id="out2" class="text-sm text-gray-600 mt-1">$300 billed → ₹24,900 gross</div></div>
+<span class="text-3xl bg-white border rounded-2xl w-12 h-12 flex items-center justify-center">🏦</span>
 </div>
-<div class="grid grid-cols-2 gap-3">
-<label class="block text-sm font-bold">Upwork fee % <input id="fee" type="number" value="10" class="mt-1 w-full border rounded-xl p-2" /></label>
-<label class="block text-sm font-bold">Withdraw cut % <input id="wd" type="number" value="4" class="mt-1 w-full border rounded-xl p-2" /></label>
+
+<div class="mt-3 text-sm divide-y bg-white">
+<div class="flex justify-between py-2"><span class="text-gray-600">Gross amount</span><b id="r1">₹24,900</b></div>
+<div class="flex justify-between py-2"><span class="text-gray-600">After Upwork 10%</span><b id="r2">₹22,410</b></div>
+<div class="flex justify-between py-2"><span class="text-gray-600">After withdrawal 4%</span><b id="r3">₹21,514</b></div>
 </div>
-<div id="break" class="text-sm bg-gray-50 rounded-xl p-3"></div>
+
+<div class="bg-[#f8f9fb] border rounded-2xl p-4 mt-4 text-sm flex gap-2">
+<span class="text-indigo-500">ⓘ</span><span>Rates are estimates. Actual conversion rate may vary based on your bank or withdrawal method.</span>
 </div>
 </div>
-<div class="text-sm bg-white border rounded-2xl p-4 mt-4 leading-6">
-<b>Example:</b> $15 x 20hrs = $300 = Rs 24,900. -10% Upwork = Rs 22,410. -4% Payoneer/bank = <b>Rs 21,513 in hand</b>. To keep Rs 30k, charge $21/hr.
-<br/><br/>Also: <a href="/tools/freelance-rate-calculator" class="text-indigo-700 font-bold">Rate calculator →</a> | <a href="/tools/budget-builder" class="text-indigo-700 font-bold">Budget builder →</a>
 </div>
 </main>
 <script>
@@ -42,11 +49,12 @@ const w=+document.getElementById('wd').value||0;
 const gross=u*h*r;
 const afterFee=gross*(1-f/100);
 const net=afterFee*(1-w/100);
-document.getElementById('out').innerText='Rs '+Math.round(net).toLocaleString('en-IN');
-document.getElementById('out2').innerText='$'+(u*h).toLocaleString()+' billed → Rs '+Math.round(gross).toLocaleString('en-IN')+' gross';
-document.getElementById('break').innerHTML='Gross Rs '+Math.round(gross).toLocaleString('en-IN')+' | After Upwork '+f+'% Rs '+Math.round(afterFee).toLocaleString('en-IN')+' | After withdraw '+w+'% <b>Rs '+Math.round(net).toLocaleString('en-IN')+'</b>';
+document.getElementById('out').innerText='₹ '+Math.round(net).toLocaleString('en-IN');
+document.getElementById('out2').innerText='$'+(u*h).toLocaleString()+' billed → ₹'+Math.round(gross).toLocaleString('en-IN')+' gross';
+document.getElementById('r1').innerText='₹'+Math.round(gross).toLocaleString('en-IN');
+document.getElementById('r2').innerText='₹'+Math.round(afterFee).toLocaleString('en-IN');
+document.getElementById('r3').innerText='₹'+Math.round(net).toLocaleString('en-IN');
 }
 ['usd','hrs','rate','fee','wd'].forEach(id=>document.getElementById(id).addEventListener('input',c));c();
 </script>
-
 </Layout>
