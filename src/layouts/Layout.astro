@@ -8,6 +8,8 @@ const { title, desc, crumbs = [] } = Astro.props;
 <head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{title}</title><meta name="description" content={desc} />
+<link rel="icon" type="image/svg+xml" href="/logo.svg" />
+<link rel="icon" href="/favicon.ico" />
 <meta name="cuelinks-verification" content="VERIFY-CL-KGOVVHCP" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -16,7 +18,7 @@ const { title, desc, crumbs = [] } = Astro.props;
 <body class="bg-[#FAFAF9] text-[#171717] min-h-screen">
 <header class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-[#E5E5E5]">
 <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-6">
-<a href="/" class="font-extrabold text-lg tracking-tight whitespace-nowrap">⚙️ Setup<span class="text-indigo-600">Karo</span></a>
+<a href="/" class="font-extrabold text-lg tracking-tight whitespace-nowrap flex items-center gap-2"><img src="/logo.svg" alt="SetupKaro logo" class="w-8 h-8" /><span>Setup<span class="text-indigo-600">Karo</span></span></a>
 <nav class="text-sm hidden sm:flex gap-5 font-medium text-gray-700">
 <a href="/" class="hover:text-indigo-600">Home</a>
 <a href="/#tools" class="hover:text-indigo-600">Tools</a>
