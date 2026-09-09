@@ -14,7 +14,7 @@ const SLOTS = {
 ---
 <Layout title={title} desc={desc} crumbs={[{label:'Home',href:'/'},{label:'Build',href:'/build'},{label:'Your setup'}]}>
 <main class="max-w-5xl mx-auto px-4 pb-10">
-<div class="bg-white rounded-2xl border border-[#E8E0D3] mt-4 p-6 sm:p-8">
+<div class="dk-card mt-4 p-6 sm:p-8" style="background:#fffdf7">
 <div class="flex flex-wrap items-start justify-between gap-3">
 <div>
 <h1 id="h1" class="text-2xl sm:text-3xl font-extrabold">Your setup</h1>
@@ -40,8 +40,8 @@ const SLOTS = {
 </div>
 
 <div class="flex flex-wrap gap-2 mt-5">
-<button id="copy" class="text-sm font-bold bg-[#221c15] text-white rounded-full px-5 py-2.5">Copy share link</button>
-<button id="save" class="text-sm font-bold border rounded-full px-5 py-2.5">Save setup</button>
+<button id="copy" class="dk-btn-dark text-sm">Copy share link</button>
+<button id="save" class="dk-btn-ghost text-sm">Save setup</button>
 <span id="msg" class="text-xs text-green-600 self-center"></span>
 </div>
 

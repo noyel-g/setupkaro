@@ -27,15 +27,15 @@ body{font-family:'Inter',system-ui,sans-serif}
 </style>
 </head>
 <body class="bg-[#FBF7F0] text-[#221c15] min-h-screen">
-<header class="sticky top-0 z-10 bg-[#FBF7F0]/95 backdrop-blur border-b border-[#E8E0D3]">
+<header class="sticky top-0 z-10 bg-[#FBF7F0]/95 backdrop-blur border-b-[3px] border-[#221c15]">
 <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-5">
 <a href="/" class="font-extrabold text-lg tracking-tight whitespace-nowrap flex items-center gap-2"><img src="/logo.svg" alt="SetupKaro logo" class="w-8 h-8" /><span>Setup<span class="text-indigo-600">Karo</span></span></a>
-<nav class="text-sm hidden sm:flex gap-5 font-medium text-gray-700">
-<a href="/build" class="hover:text-indigo-600">Build</a>
-<a href="/circle" class="hover:text-indigo-600">Setups</a>
-<a href="/products" class="hover:text-indigo-600">Products</a>
-<a href="/tools" class="hover:text-indigo-600">Tools</a>
-<a href="/guides" class="hover:text-indigo-600">Guides</a>
+<nav class="text-sm hidden sm:flex gap-5 font-bold">
+<a href="/build" class="hover:bg-[#FDE68A] rounded-full px-2">Build</a>
+<a href="/circle" class="hover:bg-[#FDE68A] rounded-full px-2">Setups</a>
+<a href="/products" class="hover:bg-[#FDE68A] rounded-full px-2">Products</a>
+<a href="/tools" class="hover:bg-[#FDE68A] rounded-full px-2">Tools</a>
+<a href="/guides" class="hover:bg-[#FDE68A] rounded-full px-2">Guides</a>
 </nav>
 <a href="/circle" class="sm:hidden text-xl ml-auto">☰</a>
 <a href="/build" class="hidden sm:inline-block ml-auto text-sm font-bold border border-[#221c15] rounded-full px-4 py-1.5 hover:bg-[#221c15] hover:text-white">Start building →</a>
@@ -53,7 +53,7 @@ body{font-family:'Inter',system-ui,sans-serif}
 )}
 <slot />
 <footer class="max-w-5xl mx-auto px-4 pb-10 pt-6 mt-6 text-sm">
-<div class="bg-white rounded-2xl border border-[#E8E0D3] p-6 grid sm:grid-cols-4 gap-6">
+<div class="dk-card p-6 grid sm:grid-cols-4 gap-6">
 <div>
 <div class="font-extrabold flex items-center gap-2"><img src="/logo.svg" alt="" class="w-6 h-6" />SetupKaro</div>
 <p class="text-xs text-gray-500 mt-2">Dream Setup. Real Plan.</p>
