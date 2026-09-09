@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Doodles from '../components/Doodles.astro';
 import products from '../data/products.json';
 const title = "Your setup plan - SetupKaro";
 const desc = "Your setup matched to real products with INR prices.";
@@ -28,7 +29,8 @@ const SLOTS = {
 
 <div class="grid sm:grid-cols-2 gap-6 mt-5">
 <div class="border border-[#E8E0D3] rounded-2xl p-4 bg-[#FBF7F0]">
-<div class="font-bold text-sm">Your visual plan <span class="font-hand font-normal text-gray-500">— a setup that works for you ☺</span></div>
+<div class="font-bold text-sm">Your visual plan <span class="font-hand font-normal text-lg text-gray-500">— a setup that works for you ☺</span></div>
+<div class="flex justify-end"><Doodles name="sparkles" /></div>
 <svg id="scene" viewBox="0 0 400 300" class="w-full h-auto mt-2"></svg>
 </div>
 <div>

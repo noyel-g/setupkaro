@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Doodles from '../components/Doodles.astro';
 const cats = [
   { t: 'gaming', icon: '🎮', name: 'Gaming', sub: 'Play. Compete. Enjoy.' },
   { t: 'office', icon: '💻', name: 'Work', sub: 'Focus. Get things done.' },
@@ -11,20 +12,25 @@ const cats = [
 ---
 <Layout title="SetupKaro - Dream Setup. Real Plan. | Setup Planner India" desc="Turn your dream setup into a plan you can actually build. Gaming, office, creator and room setups with real INR prices.">
 <main class="max-w-5xl mx-auto px-4 pb-10">
-<div class="bg-white rounded-2xl border border-[#E8E0D3] mt-4 p-6 sm:p-10 grid sm:grid-cols-2 gap-8 items-center">
+<div class="text-center mt-2">
+<span class="font-hand text-2xl">Turn your <span class="hl font-bold">screenshot folder</span> into a setup.</span>
+<Doodles name="arrow" />
+</div>
+<div class="bg-white rounded-2xl border border-[#E8E0D3] mt-2 p-6 sm:p-10 grid sm:grid-cols-2 gap-8 items-center">
 <div>
 <div class="text-[11px] font-bold tracking-widest text-amber-600">INDIA'S SETUP PLANNER</div>
 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mt-2">What are you building?</h1>
+<Doodles name="squiggle" />
 <p class="text-gray-600 mt-3">Turn your dream setup into a plan you can actually build.</p>
 <div class="flex flex-wrap gap-3 mt-5">
-<a href="/build" class="bg-[#221c15] text-white text-sm font-bold px-5 py-2.5 rounded-full">Build my setup →</a>
+<a href="/build" class="bg-amber-400 text-[#221c15] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-amber-500">Build my setup →</a>
 <a href="/circle" class="text-sm font-bold border border-[#221c15] rounded-full px-5 py-2.5">Explore setups</a>
 </div>
 <div class="flex flex-wrap gap-x-5 gap-y-1 mt-5 text-xs text-gray-600 font-medium">
 <span>⚡ Free to use</span><span>📍 Made for India</span><span>👤 No login</span>
 </div>
 </div>
-<div>
+<div class="relative">
 <svg viewBox="0 0 400 300" class="w-full h-auto" role="img" aria-label="Cozy desk setup doodle">
 <rect x="60" y="190" width="280" height="14" rx="7" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>
 <rect x="80" y="204" width="12" height="60" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>
@@ -45,12 +51,13 @@ const cats = [
 <text x="40" y="260" font-family="Caveat, cursive" font-size="20" fill="#221c15" transform="rotate(-6 40 260)">Coffee ideas</text>
 <text x="48" y="278" font-family="Caveat, cursive" font-size="20" fill="#221c15" transform="rotate(-6 48 278)">Progress ✓</text>
 </svg>
+<div class="absolute -top-2 right-2 w-20"><Doodles name="mascot" /></div>
 </div>
 </div>
 
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4" id="cats">
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
 {cats.map((c) => (
-<a href={`/build?type=${c.t}`} class="bg-white border border-[#E8E0D3] rounded-2xl p-5 hover:border-gray-400 block">
+<a href={`/build?type=${c.t}`} class="bg-white border border-[#E8E0D3] rounded-2xl p-5 hover:border-amber-500 block">
 <div class="text-3xl">{c.icon}</div>
 <div class="font-bold mt-2">{c.name}</div>
 <div class="text-xs text-gray-500">{c.sub}</div>
@@ -60,7 +67,7 @@ const cats = [
 
 <a href="/circle" class="block mt-4 bg-[#221c15] text-white rounded-2xl p-5">
 <span class="text-[11px] font-bold tracking-wide opacity-70">THE CIRCLE</span>
-<span class="font-semibold block mt-1">Good fellas. Same dream. Real setups.</span>
+<span class="font-semibold block mt-1">Good fellas. Same dream. Real setups. <span class="font-hand font-normal opacity-70">Good setups, happier humans ♡</span></span>
 <span class="text-sm opacity-70 block mt-1">A small community, not an audience. See the wall →</span>
 </a>
 </main>
