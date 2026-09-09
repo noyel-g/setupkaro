@@ -1,49 +1,67 @@
 ---
 import Layout from '../layouts/Layout.astro';
-const tools = [
-  { href: '/tools/freelance-rate-calculator', cat: 'EARN', name: 'Freelance Rate Calculator', sub: 'Know what to charge per hour in INR, with Upwork cut included.' },
-  { href: '/tools/upwork-fees-calculator', cat: 'EARN', name: 'Upwork Fees Calculator', sub: 'See your actual INR payout after fees.' },
-  { href: '/tools/editing-rate-calculator', cat: 'EARN', name: 'Editing Rate Calculator', sub: 'Price video editing work per minute.' },
-  { href: '/tools/youtube-setup-under-5000', cat: 'CREATE', name: 'YouTube Setup Under ₹5000', sub: 'Starter gear checklist with real prices.' },
-  { href: '/guides/best-mic-under-2000', cat: 'CREATE', name: 'Best Mic Under ₹2000', sub: 'Tested in a noisy room. What I actually bought.' },
-  { href: '/guides/hosting-for-portfolio', cat: 'BUILD', name: 'Hosting for Portfolio', sub: 'Portfolio hosting under ₹2000/yr, renewal traps explained.' },
-  { href: '/guides/fiverr-vs-upwork-fees-india', cat: 'EARN', name: 'Fiverr vs Upwork Fees', sub: '$100 compared in INR — which keeps more?' },
+const cats = [
+  { t: 'gaming', icon: '🎮', name: 'Gaming', sub: 'Play. Compete. Enjoy.' },
+  { t: 'office', icon: '💻', name: 'Work', sub: 'Focus. Get things done.' },
+  { t: 'creator', icon: '🎙️', name: 'Creator', sub: 'Record. Edit. Create.' },
+  { t: 'study', icon: '📖', name: 'Study', sub: 'Learn. Grow.' },
+  { t: 'room', icon: '🪴', name: 'Room', sub: 'Make it yours.' },
+  { t: 'creator', icon: '•••', name: 'Something else', sub: 'Tell us more.' },
 ];
 ---
-<Layout title="Freelance Rate Calculator India, Upwork Fees & Budget Setup Guides - SetupKaro" desc="Free freelance rate calculator India, Upwork fees calculator in INR, video editing rates and budget YouTube setup guides. Built for Indian creators and freelancers.">
-<main class="max-w-5xl mx-auto px-4 pb-10" id="tools">
-<div class="bg-white rounded-2xl border mt-4 p-6 sm:p-8">
-<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Useful tools for getting work done.</h1>
-<p class="text-gray-600 mt-2">Calculators, guides and resources for creators and freelancers in India.</p>
-<p class="text-sm text-gray-500 mt-1">Free to use &nbsp;•&nbsp; Made for India &nbsp;•&nbsp; No login</p>
-<div class="mt-4 relative max-w-xl">
-<input id="q" type="search" placeholder="Search tools, guides and calculators..." class="w-full border rounded-full py-2.5 pl-10 pr-4 text-sm outline-none focus:border-indigo-500" />
-<span class="absolute left-4 top-2.5 text-gray-400">🔍</span>
+<Layout title="SetupKaro - Dream Setup. Real Plan. | Setup Planner India" desc="Turn your dream setup into a plan you can actually build. Gaming, office, creator and room setups with real INR prices.">
+<main class="max-w-5xl mx-auto px-4 pb-10">
+<div class="bg-white rounded-2xl border border-[#E8E0D3] mt-4 p-6 sm:p-10 grid sm:grid-cols-2 gap-8 items-center">
+<div>
+<div class="text-[11px] font-bold tracking-widest text-amber-600">INDIA'S SETUP PLANNER</div>
+<h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mt-2">What are you building?</h1>
+<p class="text-gray-600 mt-3">Turn your dream setup into a plan you can actually build.</p>
+<div class="flex flex-wrap gap-3 mt-5">
+<a href="/build" class="bg-[#221c15] text-white text-sm font-bold px-5 py-2.5 rounded-full">Build my setup →</a>
+<a href="/circle" class="text-sm font-bold border border-[#221c15] rounded-full px-5 py-2.5">Explore setups</a>
 </div>
-<div class="font-bold mt-7 mb-3">Popular tools</div>
-<div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-{tools.map((t) => (
-<a href={t.href} data-name={(t.name + ' ' + t.sub).toLowerCase()} class="tool-card bg-white border border-[#E5E5E5] rounded-xl p-5 block hover:border-gray-400">
-<span class="text-[11px] font-bold tracking-wide text-indigo-600">{t.cat}</span>
-<span class="font-semibold block mt-1 leading-snug">{t.name}</span>
-<span class="text-sm text-gray-600 block mt-1">{t.sub}</span>
-<span class="text-sm font-semibold text-gray-900 block mt-3">Open →</span>
+<div class="flex flex-wrap gap-x-5 gap-y-1 mt-5 text-xs text-gray-600 font-medium">
+<span>⚡ Free to use</span><span>📍 Made for India</span><span>👤 No login</span>
+</div>
+</div>
+<div>
+<svg viewBox="0 0 400 300" class="w-full h-auto" role="img" aria-label="Cozy desk setup doodle">
+<rect x="60" y="190" width="280" height="14" rx="7" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>
+<rect x="80" y="204" width="12" height="60" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>
+<rect x="308" y="204" width="12" height="60" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>
+<rect x="150" y="110" width="110" height="70" rx="8" fill="#221c15"/>
+<rect x="158" y="118" width="94" height="54" rx="4" fill="#8FA8D8"/>
+<rect x="188" y="180" width="34" height="10" fill="#221c15"/>
+<rect x="120" y="182" width="60" height="8" rx="4" fill="#F5B942" stroke="#221c15" stroke-width="2.5"/>
+<rect x="235" y="182" width="40" height="8" rx="4" fill="#F5B942" stroke="#221c15" stroke-width="2.5"/>
+<circle cx="105" cy="150" r="16" fill="#B7D48F" stroke="#221c15" stroke-width="3"/>
+<rect x="100" y="166" width="10" height="24" fill="#C96F4A" stroke="#221c15" stroke-width="3"/>
+<rect x="300" y="90" width="44" height="60" rx="6" fill="#FDE68A" stroke="#221c15" stroke-width="3"/>
+<rect x="318" y="150" width="8" height="40" fill="#221c15"/>
+<ellipse cx="120" cy="250" rx="34" ry="10" fill="#D8C9AE" stroke="#221c15" stroke-width="3"/>
+<rect x="285" y="200" width="34" height="46" rx="4" fill="#3B3B3B" stroke="#221c15" stroke-width="3"/>
+<text x="300" y="60" font-family="Caveat, cursive" font-size="22" fill="#221c15" transform="rotate(4 300 60)">Good gear.</text>
+<text x="292" y="82" font-family="Caveat, cursive" font-size="22" fill="#221c15" transform="rotate(4 292 82)">Better days.</text>
+<text x="40" y="260" font-family="Caveat, cursive" font-size="20" fill="#221c15" transform="rotate(-6 40 260)">Coffee ideas</text>
+<text x="48" y="278" font-family="Caveat, cursive" font-size="20" fill="#221c15" transform="rotate(-6 48 278)">Progress ✓</text>
+</svg>
+</div>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4" id="cats">
+{cats.map((c) => (
+<a href={`/build?type=${c.t}`} class="bg-white border border-[#E8E0D3] rounded-2xl p-5 hover:border-gray-400 block">
+<div class="text-3xl">{c.icon}</div>
+<div class="font-bold mt-2">{c.name}</div>
+<div class="text-xs text-gray-500">{c.sub}</div>
 </a>
 ))}
 </div>
-<a href="/circle" class="block mt-4 bg-gray-900 text-white rounded-xl p-5">
+
+<a href="/circle" class="block mt-4 bg-[#221c15] text-white rounded-2xl p-5">
 <span class="text-[11px] font-bold tracking-wide opacity-70">THE CIRCLE</span>
 <span class="font-semibold block mt-1">Good fellas. Same dream. Real setups.</span>
 <span class="text-sm opacity-70 block mt-1">A small community, not an audience. See the wall →</span>
 </a>
-</div>
 </main>
-<script>
-const q = document.getElementById('q');
-const cards = Array.from(document.querySelectorAll('.tool-card'));
-q.addEventListener('input', () => {
-  const s = q.value.toLowerCase().trim();
-  cards.forEach(c => { c.style.display = !s || c.dataset.name.includes(s) ? '' : 'none'; });
-});
-</script>
 </Layout>

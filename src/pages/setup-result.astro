@@ -1,0 +1,147 @@
+---
+import Layout from '../layouts/Layout.astro';
+import products from '../data/products.json';
+const title = "Your setup plan - SetupKaro";
+const desc = "Your setup matched to real products with INR prices.";
+const SLOTS = {
+  gaming: [['monitor',.30],['keyboard',.10],['mouse',.06],['chair',.22],['desk',.14],['light',.05],['mic',.05]],
+  office: [['chair',.24],['desk',.20],['monitor',.26],['keyboard',.08],['mouse',.05],['light',.07],['webcam',.05]],
+  creator: [['mic',.12],['light',.10],['monitor',.24],['chair',.18],['desk',.14],['tripod',.04],['keyboard',.08]],
+  study: [['desk',.22],['chair',.26],['monitor',.22],['light',.08],['keyboard',.08],['tripod',.04]],
+  room: [['light',.15],['desk',.25],['chair',.25],['monitor',.20],['tripod',.05]],
+};
+---
+<Layout title={title} desc={desc} crumbs={[{label:'Home',href:'/'},{label:'Build',href:'/build'},{label:'Your setup'}]}>
+<main class="max-w-5xl mx-auto px-4 pb-10">
+<div class="bg-white rounded-2xl border border-[#E8E0D3] mt-4 p-6 sm:p-8">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<h1 id="h1" class="text-2xl sm:text-3xl font-extrabold">Your setup</h1>
+<p id="sub" class="text-sm text-gray-500 mt-1"></p>
+</div>
+<div class="text-right">
+<div id="total" class="text-2xl font-extrabold">₹0</div>
+<div class="w-44 h-2 bg-gray-100 rounded-full overflow-hidden mt-1"><div id="tbar" class="h-full bg-green-500 rounded-full" style="width:0%"></div></div>
+<div id="tmsg" class="text-xs mt-1"></div>
+</div>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-6 mt-5">
+<div class="border border-[#E8E0D3] rounded-2xl p-4 bg-[#FBF7F0]">
+<div class="font-bold text-sm">Your visual plan <span class="font-hand font-normal text-gray-500">— a setup that works for you ☺</span></div>
+<svg id="scene" viewBox="0 0 400 300" class="w-full h-auto mt-2"></svg>
+</div>
+<div>
+<div class="font-bold text-sm">Parts list</div>
+<div id="parts" class="space-y-2 mt-2"></div>
+</div>
+</div>
+
+<div class="flex flex-wrap gap-2 mt-5">
+<button id="copy" class="text-sm font-bold bg-[#221c15] text-white rounded-full px-5 py-2.5">Copy share link</button>
+<button id="save" class="text-sm font-bold border rounded-full px-5 py-2.5">Save setup</button>
+<span id="msg" class="text-xs text-green-600 self-center"></span>
+</div>
+
+<div class="mt-6">
+<div class="flex gap-4 text-sm font-bold border-b">
+<button data-tab="all" class="tab-btn pb-2 border-b-2 border-[#221c15]">All Products</button>
+<button data-tab="why" class="tab-btn pb-2 border-b-2 border-transparent text-gray-500">Why These</button>
+</div>
+<div id="tab-all" class="text-sm divide-y"></div>
+<div id="tab-why" class="text-sm leading-7 mt-3 hidden"></div>
+</div>
+</div>
+</main>
+<script define:vars={{ products, SLOTS }}>
+const q = new URLSearchParams(location.search);
+const type = (q.get('type') || 'gaming').toLowerCase();
+const budget = Math.max(10000, +q.get('budget') || 40000);
+const prio = q.get('prio') || 'Balanced';
+const hrs = q.get('hrs') || '';
+const slots = SLOTS[type] || SLOTS.gaming;
+const labels = { gaming: 'Gaming', office: 'Work From Home', creator: 'Creator', study: 'Study', room: 'Room' };
+function inr(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+let boost = {};
+if (prio === 'Comfort' || prio === 'Cozy') boost = { chair: 1.35, light: 1.25 };
+if (prio === 'Aesthetic') boost = { light: 1.4, desk: 1.25 };
+if (prio === 'Maximum performance') boost = { monitor: 1.3, keyboard: 1.2, mouse: 1.2 };
+let picks = [], total = 0;
+const pool = {};
+slots.forEach(([slot, share]) => {
+  let alloc = budget * share * (boost[slot] || 1);
+  if (prio === 'Minimal' && (slot === 'light' || slot === 'tripod')) return;
+  const cands = products.filter(p => p.slot === slot);
+  pool[slot] = cands;
+  let pick = cands.filter(p => p.price <= alloc).sort((a, b) => b.price - a.price)[0]
+    || [...cands].sort((a, b) => a.price - b.price)[0];
+  if (!pick) return;
+  picks.push({ slot, ...pick });
+  total += pick.price;
+});
+document.getElementById('h1').innerText = 'Your ' + inr(total) + ' ' + (labels[type] || 'Custom') + ' Setup';
+document.getElementById('sub').innerText = 'Built for ' + (hrs || 'daily use') + ', ' + prio.toLowerCase() + ' priority • Budget ' + inr(budget);
+document.getElementById('total').innerText = inr(total) + ' / ' + inr(budget);
+const pct = Math.min(100, Math.round(total / budget * 100));
+document.getElementById('tbar').style.width = pct + '%';
+const left = budget - total;
+const tm = document.getElementById('tmsg');
+if (left >= 0) {
+  document.getElementById('tbar').className = 'h-full bg-green-500 rounded-full';
+  tm.innerHTML = inr(left) + ' remaining • <b>You’re within budget! 🎉</b>';
+} else {
+  document.getElementById('tbar').className = 'h-full bg-red-500 rounded-full';
+  tm.innerHTML = inr(-left) + ' over — drop one tier on the priciest pick.';
+}
+const icons = { monitor: 0, keyboard: 1, mouse: 2, chair: 3, desk: -1, light: 4, mic: 5, tripod: 6, webcam: 7 };
+const scene = document.getElementById('scene');
+let svg = '<rect x="60" y="190" width="280" height="14" rx="7" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>'
+  + '<rect x="80" y="204" width="12" height="60" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>'
+  + '<rect x="308" y="204" width="12" height="60" fill="#E8DCC8" stroke="#221c15" stroke-width="3"/>'
+  + '<rect x="150" y="110" width="110" height="70" rx="8" fill="#221c15"/>'
+  + '<rect x="158" y="118" width="94" height="54" rx="4" fill="#8FA8D8"/>'
+  + '<ellipse cx="120" cy="250" rx="34" ry="10" fill="#D8C9AE" stroke="#221c15" stroke-width="3"/>';
+const spots = [[330, 60], [330, 100], [330, 140], [330, 180], [40, 60], [40, 100], [40, 140], [40, 180], [330, 220]];
+picks.slice(0, 9).forEach((p, i) => {
+  const [x, y] = spots[i];
+  svg += '<g><rect x="' + x + '" y="' + y + '" width="58" height="30" rx="8" fill="#fff" stroke="#221c15" stroke-width="2.5"/>'
+    + '<text x="' + (x + 29) + '" y="' + (y + 19) + '" text-anchor="middle" font-size="15">' + (p.icon || '📦') + '</text>'
+    + '<text x="' + (x + 29) + '" y="' + (y + 44) + '" text-anchor="middle" font-size="10" font-weight="bold">' + inr(p.price) + '</text></g>';
+});
+scene.innerHTML = svg;
+const parts = document.getElementById('parts');
+parts.innerHTML = picks.map(p =>
+  '<a href="/products/' + p.slug + '" class="flex items-center gap-3 border border-[#E8E0D3] rounded-xl p-3 hover:border-gray-400">'
+  + '<span class="text-2xl">' + (p.icon || '📦') + '</span>'
+  + '<span class="flex-1"><span class="font-semibold text-sm block">' + p.name + '</span>'
+  + '<span class="text-xs text-gray-500">' + inr(p.price) + ' • ' + p.tier + '</span></span>'
+  + '<span class="text-sm font-bold">→</span></a>'
+).join('');
+document.getElementById('tab-all').innerHTML = picks.map(p =>
+  '<div class="py-3 flex justify-between gap-3"><span><b>' + p.name + '</b><br/><span class="text-gray-500 text-xs">' + p.verdict + '</span></span><b class="whitespace-nowrap">' + inr(p.price) + '</b></div>'
+).join('');
+document.getElementById('tab-why').innerHTML = picks.map(p =>
+  '<p><b>' + p.name + ':</b> ' + p.why + ' <span class="text-gray-500">Skip if: ' + p.skipIf + '</span></p>'
+).join('');
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tab-btn').forEach(x => { x.classList.add('text-gray-500'); x.classList.replace('border-[#221c15]', 'border-transparent'); });
+  b.classList.remove('text-gray-500'); b.classList.replace('border-transparent', 'border-[#221c15]');
+  document.getElementById('tab-all').classList.toggle('hidden', b.dataset.tab !== 'all');
+  document.getElementById('tab-why').classList.toggle('hidden', b.dataset.tab !== 'why');
+}));
+document.getElementById('copy').addEventListener('click', () => {
+  const link = location.href;
+  if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => {
+    document.getElementById('msg').innerText = 'Link copied — share the inspiration ✓';
+  });
+});
+document.getElementById('save').addEventListener('click', () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('sk-setups') || '[]');
+    saved.push({ type, budget, prio, total, at: Date.now() });
+    localStorage.setItem('sk-setups', JSON.stringify(saved));
+    document.getElementById('msg').innerText = 'Saved on this device ✓';
+  } catch (e) { document.getElementById('msg').innerText = 'Could not save here.'; }
+});
+</script>
+</Layout>

@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+const tools = [
+  { href: '/tools/freelance-rate-calculator', cat: 'Earn', name: 'Freelance Rate Calculator', sub: 'Find your sustainable hourly rate.' },
+  { href: '/tools/upwork-fees-calculator', cat: 'Earn', name: 'Upwork Fee Calculator', sub: 'See how much you actually earn.' },
+  { href: '/tools/editing-rate-calculator', cat: 'Earn', name: 'Editing Rate Calculator', sub: 'Price your video editing projects.' },
+  { href: '/build', cat: 'Plan', name: 'Setup Budget Calculator', sub: 'Plan your setup cost.' },
+  { href: '/tools/youtube-setup-under-5000', cat: 'Plan', name: 'YouTube Setup Planner', sub: 'Starter gear checklist.' },
+];
+---
+<Layout title="Tools that keep the numbers honest - SetupKaro" desc="Calculators, planners and helpers for creators, freelancers and builders." crumbs={[{label:'Home',href:'/'},{label:'Tools'}]}>
+<main class="max-w-5xl mx-auto px-4 pb-10">
+<div class="bg-white rounded-2xl border border-[#E8E0D3] mt-4 p-6 sm:p-8">
+<h1 class="text-2xl sm:text-3xl font-extrabold">Tools that keep the numbers honest.</h1>
+<p class="text-sm text-gray-500 mt-1">Calculators, planners and helpers for creators, freelancers and builders.</p>
+<div class="flex flex-wrap gap-2 mt-4" id="pills">
+{['All', 'Earn', 'Build', 'Plan'].map((c, i) => (
+<button data-c={c} class={`pill text-xs font-bold border rounded-full px-4 py-1.5 ${i===0?'bg-[#221c15] text-white':''}`}>{c}</button>
+))}
+</div>
+<div id="grid" class="grid sm:grid-cols-2 gap-3 mt-4">
+{tools.map((t) => (
+<a href={t.href} data-cat={t.cat} class="tool border border-[#E8E0D3] rounded-xl p-5 block hover:border-gray-400">
+<span class="text-[11px] font-bold tracking-wide text-indigo-600">{t.cat.toUpperCase()}</span>
+<span class="font-semibold block mt-1">{t.name}</span>
+<span class="text-sm text-gray-500 block mt-1">{t.sub}</span>
+<span class="text-sm font-semibold block mt-3">Open →</span>
+</a>
+))}
+</div>
+</div>
+</main>
+<script>
+const pills = Array.from(document.querySelectorAll('.pill'));
+const cards = Array.from(document.querySelectorAll('.tool'));
+pills.forEach(b => b.addEventListener('click', () => {
+  pills.forEach(x => { x.classList.remove('bg-[#221c15]', 'text-white'); });
+  b.classList.add('bg-[#221c15]', 'text-white');
+  const c = b.dataset.c;
+  cards.forEach(k => { k.style.display = (c === 'All' || k.dataset.cat === c) ? '' : 'none'; });
+}));
+</script>
+</Layout>
