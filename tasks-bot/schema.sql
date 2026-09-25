@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS workers (
   tg_id INTEGER PRIMARY KEY,
   tg_username TEXT,
   reddit_user TEXT,
+  reddit_created INTEGER DEFAULT 0,
+  link_karma INTEGER DEFAULT 0,
+  comment_karma INTEGER DEFAULT 0,
   status TEXT DEFAULT 'pending',
   created_at INTEGER
 );
@@ -27,6 +30,9 @@ CREATE TABLE IF NOT EXISTS tasks (
   amount INTEGER,
   needed INTEGER,
   deadline TEXT,
+  image_ids TEXT DEFAULT '[]',
+  min_age_days INTEGER DEFAULT 0,
+  min_karma INTEGER DEFAULT 0,
   status TEXT DEFAULT 'open',
   created_at INTEGER
 );

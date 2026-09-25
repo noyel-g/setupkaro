@@ -52,8 +52,24 @@ async function redditInfo(user) {
       created: d.created_utc ? date(Math.floor(d.created_utc)) : '?',
       link: d.link_karma ?? '?',
       comment: d.comment_karma ?? '?',
+      createdUtc: d.created_utc ? Math.floor(d.created_utc) : 0,
+      linkN: typeof d.link_karma === 'number' ? d.link_karma : 0,
+      commentN: typeof d.comment_karma === 'number' ? d.comment_karma : 0,
     };
   } catch { return null; }
+}
+
+// Honest proxy for Contributor Quality Score (Reddit's real CQS is internal
+// and invisible to any API). Never presented as Reddit's score.
+function cqsTier(ageDays, karma) {
+  if (ageDays >= 365 && karma >= 1000) return 'high';
+  if ((ageDays >= 365 && karma >= 100) || (ageDays >= 180 && karma >= 500)) return 'moderate';
+  return 'low';
+}
+function statsOf(w) {
+  const age = w.reddit_created ? Math.floor((now() - w.reddit_created) / 86400) : 0;
+  const karma = (w.link_karma || 0) + (w.comment_karma || 0);
+  return { age, karma, tier: cqsTier(age, karma) };
 }
 
 async function workerStatus(env, id) {
@@ -157,8 +173,9 @@ async function listApps(env, chatId) {
   if (!rows.length) { await send(env, chatId, `No pending applications. 🎉`); return; }
   for (const a of rows) {
     const info = a.reddit_user ? await redditInfo(a.reddit_user) : null;
+    const tier = info ? cqsTier(info.createdUtc ? Math.floor((now() - info.createdUtc) / 86400) : 0, info.linkN + info.commentN) : '?';
     const rline = a.reddit_user
-      ? `Reddit: u/${esc(a.reddit_user)} — https://www.reddit.com/user/${encodeURIComponent(a.reddit_user)}\n${info ? `Reddit age: ${info.created} • link karma ${info.link} • comment karma ${info.comment}` : `Reddit public info unavailable — open profile manually.`}`
+      ? `Reddit: u/${esc(a.reddit_user)} — https://www.reddit.com/user/${encodeURIComponent(a.reddit_user)}\n${info ? `Reddit age: ${info.created} • link karma ${info.link} • comment karma ${info.comment} • quality-proxy: ${tier}` : `Reddit public info unavailable — open profile manually.`}`
       : `Reddit: 📷 screenshot only (private profile)`;
     const body = `<b>📥 Application #${a.id}</b>\nTelegram: @${esc(a.tg_username || '?')} (<code>${a.tg_id}</code>)\n${rline}\nDate: ${date(a.created_at)}\nStatus: <b>${a.status}</b>\n\n<i>Review history, karma, activity &amp; standing yourself — never auto-approve on karma alone.</i>`;
     const kb = { reply_markup: { inline_keyboard: [[
@@ -173,50 +190,98 @@ async function listApps(env, chatId) {
   }
 }
 
-// ---- task creation wizard ----
-const TFIELDS = [
-  ['t_title', 'Send the <b>task title</b> (or /cancel).'],
-  ['t_client', 'Client / reference name?'],
-  ['t_sub', 'Target subreddit (name only, no r/)?'],
-  ['t_content', 'Paste the <b>content to post</b>.'],
-  ['t_instr', 'Additional instructions? (send - to skip)'],
-  ['t_amount', 'Payment amount in ₹ (number only)?'],
-  ['t_needed', 'Number of workers required (number)?'],
-  ['t_deadline', 'Deadline? (text, or - for none)'],
-];
-async function taskWizard(env, chatId, from, text, sess) {
-  if (text === '/cancel') { await clearSess(env, from.id); await send(env, chatId, `Task creation cancelled.`); return true; }
-  const step = TFIELDS.findIndex(([k]) => k === sess.state);
-  const d = { ...sess.data };
-  const val = text.trim();
-  if (sess.state === 't_title') d.title = val;
-  else if (sess.state === 't_client') d.client = val;
-  else if (sess.state === 't_sub') d.sub = val.replace(/^r\//i, '');
-  else if (sess.state === 't_content') d.content = val;
-  else if (sess.state === 't_instr') d.instr = val === '-' ? '' : val;
-  else if (sess.state === 't_amount') {
-    if (!/^\d+$/.test(val)) { await send(env, chatId, `Send a plain number for ₹ (e.g. 100).`); return true; }
-    d.amount = +val;
-  } else if (sess.state === 't_needed') {
-    if (!/^\d+$/.test(val) || +val < 1) { await send(env, chatId, `Send workers needed as a number ≥ 1.`); return true; }
-    d.needed = +val;
-  } else if (sess.state === 't_deadline') d.deadline = val === '-' ? '' : val;
-  if (step < TFIELDS.length - 1) {
-    await setSess(env, from.id, TFIELDS[step + 1][0], d);
-    await send(env, chatId, TFIELDS[step + 1][1]);
+// ---- qualified broadcast (stats refreshed, moderate+ quality always required) ----
+async function qualifiedWorkers(env, minAge, minKarma) {
+  const ws = (await env.DB.prepare("SELECT * FROM workers WHERE status='approved'").all()).results;
+  for (const w of ws) {
+    if (w.reddit_user) {
+      const info = await redditInfo(w.reddit_user);
+      if (info) await env.DB.prepare('UPDATE workers SET reddit_created=?, link_karma=?, comment_karma=? WHERE tg_id=?')
+        .bind(info.createdUtc, info.linkN, info.commentN, w.tg_id).run().catch(() => {});
+    }
+  }
+  const fresh = (await env.DB.prepare("SELECT * FROM workers WHERE status='approved'").all()).results;
+  return fresh.filter(w => {
+    const s = statsOf(w);
+    if (minAge > 0 && s.age < minAge) return false;
+    if (minKarma > 0 && s.karma < minKarma) return false;
+    if (s.tier === 'low') return false;
+    return true;
+  });
+}
+async function newTaskFlow(env, chatId, from, text, photoId, sess) {
+  const d = { body: '', photos: [], ...(sess.data || {}) };
+  const st = sess.state;
+  if (st === 'n_details') {
+    if (photoId) {
+      if (d.photos.length >= 5) { await send(env, chatId, `5 photos max — send /done to continue, or /cancel.`); return true; }
+      d.photos.push(photoId);
+      if (text && text !== '/done') d.body += (d.body ? '\n' : '') + text;
+      await setSess(env, from.id, 'n_details', d);
+      await send(env, chatId, `Photo ${d.photos.length} saved. Send more text/photos, then /done — or /cancel.`);
+      return true;
+    }
+    if (!text) return true;
+    d.body += (d.body ? '\n' : '') + text;
+    await setSess(env, from.id, 'n_details', d);
+    await send(env, chatId, `Noted. Send more (text/photos), then /done — or /cancel.`);
     return true;
   }
-  const r = await env.DB.prepare(
-    'INSERT INTO tasks (title, client, subreddit, content, instructions, amount, needed, deadline, status, created_at) VALUES (?,?,?,?,?,?,?,?,\'open\',?)')
-    .bind(d.title, d.client, d.sub, d.content, d.instr || '', d.amount, d.needed, d.deadline || '', now()).run();
-  await clearSess(env, from.id);
-  const tid = r.meta.last_row_id;
-  await send(env, chatId, `✅ Task #${tid} created and open. Notifying eligible workers…`);
-  const ws = (await env.DB.prepare("SELECT tg_id FROM workers WHERE status='approved'").all()).results;
-  for (const w of ws) {
-    await send(env, w.tg_id,
-      `📢 <b>New task available</b>\nTask: <b>${esc(d.title)}</b>\nTarget: r/${esc(d.sub)}\nPayment: <b>${inr(d.amount)}</b>\nWorkers needed: ${d.needed}`,
-      { reply_markup: { inline_keyboard: [[{ text: '👁 View Task', callback_data: `w:view:${tid}` }]] } }).catch(() => {});
+  const val = text.trim();
+  if (st === 'n_amount') {
+    if (!/^\d+$/.test(val)) { await send(env, chatId, `Payment in ₹ as a plain number (e.g. 100).`); return true; }
+    d.amount = +val;
+    await setSess(env, from.id, 'n_needed', d);
+    await send(env, chatId, `Workers needed (number)?`);
+    return true;
+  }
+  if (st === 'n_needed') {
+    if (!/^\d+$/.test(val) || +val < 1) { await send(env, chatId, `Workers needed as a number ≥ 1.`); return true; }
+    d.needed = +val;
+    await setSess(env, from.id, 'n_deadline', d);
+    await send(env, chatId, `Deadline? (text, or - for none)`);
+    return true;
+  }
+  if (st === 'n_deadline') {
+    d.deadline = val === '-' ? '' : val;
+    await setSess(env, from.id, 'n_age', d);
+    await send(env, chatId, `Minimum Reddit account age in days? (0 = any, suggested 365)`);
+    return true;
+  }
+  if (st === 'n_age') {
+    if (!/^\d+$/.test(val)) { await send(env, chatId, `Number of days, 0 for any.`); return true; }
+    d.minAge = +val;
+    await setSess(env, from.id, 'n_karma', d);
+    await send(env, chatId, `Minimum total karma? (0 = any, suggested 100)`);
+    return true;
+  }
+  if (st === 'n_karma') {
+    if (!/^\d+$/.test(val)) { await send(env, chatId, `Number, 0 for any.`); return true; }
+    d.minKarma = +val;
+    const firstLine = (d.body.split('\n').find(l => l.trim()) || 'Untitled task').slice(0, 80);
+    const subm = d.body.match(/r\/([A-Za-z0-9_]+)/);
+    const r = await env.DB.prepare(
+      "INSERT INTO tasks (title, client, subreddit, content, instructions, amount, needed, deadline, image_ids, min_age_days, min_karma, status, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,'open',?)")
+      .bind(firstLine, '', subm ? subm[1] : '', d.body, '', d.amount, d.needed, d.deadline || '', JSON.stringify(d.photos), d.minAge, d.minKarma, now()).run();
+    await clearSess(env, from.id);
+    const tid = r.meta.last_row_id;
+    await send(env, chatId, `✅ Task #${tid} created. Checking who qualifies (age ≥ ${d.minAge}d, karma ≥ ${d.minKarma}, quality moderate+)…`);
+    const qs = await qualifiedWorkers(env, d.minAge, d.minKarma);
+    const all = (await env.DB.prepare("SELECT COUNT(*) c FROM workers WHERE status='approved'").first()).c;
+    let sent = 0;
+    for (const w of qs) {
+      const ok = await send(env, w.tg_id,
+        `📢 <b>New task available</b>\nTask: <b>${esc(firstLine)}</b>${subm ? `\nTarget: r/${esc(subm[1])}` : ''}\nPayment: <b>${inr(d.amount)}</b>\nWorkers needed: ${d.needed}`,
+        { reply_markup: { inline_keyboard: [[{ text: '👁 View Task', callback_data: `w:view:${tid}` }]] } }).catch(() => null);
+      if (ok && ok.ok !== false) {
+        sent++;
+        for (const fid of d.photos.slice(0, 5)) {
+          await tg(env, 'sendPhoto', { chat_id: w.tg_id, photo: fid }).catch(() => {});
+        }
+      }
+    }
+    await send(env, chatId, `Notified <b>${sent}/${all}</b> approved workers — only qualifiers got it.`);
+    return true;
   }
   return true;
 }
@@ -241,8 +306,13 @@ async function onCb(env, cb) {
       const t = await env.DB.prepare('SELECT * FROM tasks WHERE id=?').bind(+arg).first();
       if (!t || t.status !== 'open') { await send(env, chatId, `That task is closed.`); return; }
       await send(env, chatId,
-        `📌 <b>${esc(t.title)}</b>\nClient: ${esc(t.client)}\nTarget: r/${esc(t.subreddit)}\nPayment: <b>${inr(t.amount)}</b>${t.deadline ? `\nDeadline: ${esc(t.deadline)}` : ''}\n\n<b>Content / instructions:</b>\n${esc(t.content)}${t.instructions ? `\n\n<i>${esc(t.instructions)}</i>` : ''}\n\n⚠️ <i>You are responsible for checking and following the rules of r/${esc(t.subreddit)} before posting.</i>`,
+        `📌 <b>${esc(t.title)}</b>${t.client ? `\nClient: ${esc(t.client)}` : ''}${t.subreddit ? `\nTarget: r/${esc(t.subreddit)}` : ''}\nPayment: <b>${inr(t.amount)}</b>${t.deadline ? `\nDeadline: ${esc(t.deadline)}` : ''}\n\n<b>Details:</b>\n${esc(t.content)}${t.instructions ? `\n\n<i>${esc(t.instructions)}</i>` : ''}${t.subreddit ? `\n\n⚠️ <i>You are responsible for checking and following the rules of r/${esc(t.subreddit)} before posting.</i>` : `\n\n⚠️ <i>Post only where the community rules allow this kind of content.</i>`}`,
         { reply_markup: { inline_keyboard: [[{ text: '✅ Accept Task', callback_data: `w:accept:${t.id}` }]] } });
+      try {
+        for (const fid of JSON.parse(t.image_ids || '[]').slice(0, 5)) {
+          await tg(env, 'sendPhoto', { chat_id: chatId, photo: fid }).catch(() => {});
+        }
+      } catch {}
       return;
     }
     if (act === 'accept' && arg) {
@@ -285,7 +355,9 @@ async function onCb(env, cb) {
       await env.DB.prepare("UPDATE applications SET status='approved', decided_at=? WHERE id=?").bind(now(), a.id).run();
       await env.DB.prepare("INSERT INTO workers (tg_id, tg_username, reddit_user, status, created_at) VALUES (?,?,?,?,?) ON CONFLICT(tg_id) DO UPDATE SET tg_username=excluded.tg_username, reddit_user=excluded.reddit_user, status='approved'")
         .bind(a.tg_id, a.tg_username, a.reddit_user, now()).run();
-      await send(env, a.tg_id, `✅ <b>Your application has been approved.</b>\n\nYou are now eligible to receive available tasks.\n\nBefore completing any task, make sure you understand the instructions and follow the rules of the target Reddit community.`);
+      const wrow = await env.DB.prepare('SELECT * FROM workers WHERE tg_id=?').bind(a.tg_id).first();
+      const s0 = wrow ? statsOf(wrow) : { age: 0, karma: 0, tier: 'low' };
+      await send(env, a.tg_id, `✅ <b>Your application has been approved.</b>\n\nYour profile: ${s0.age}-day-old account • ${s0.karma} karma • quality tier ${s0.tier}.\n\nYou are now eligible to receive available tasks.\n\nBefore completing any task, make sure you understand the instructions and follow the rules of the target Reddit community.`);
       await send(env, chatId, `Application #${a.id} approved. Worker notified.`);
       return;
     }
@@ -322,8 +394,10 @@ async function onCb(env, cb) {
       await env.DB.prepare("UPDATE assignments SET status='completed', verified_at=? WHERE id=?").bind(now(), s.id).run();
       await env.DB.prepare("INSERT INTO payments (assignment_id, task_id, tg_id, amount, status, created_at) VALUES (?,?,?,?,'pending',?)")
         .bind(s.id, s.task_id, s.tg_id, s.amount, now()).run();
-      await send(env, s.tg_id, `✅ <b>Your task has been verified successfully.</b>\n\nPayment: <b>${inr(s.amount)}</b>\nPayment status: Pending.`);
-      await send(env, chatId, `Submission #${s.id} approved → payment ${inr(s.amount)} set to Pending.`);
+      const told = await send(env, s.tg_id, `✅ <b>Your task has been verified successfully.</b>\n\nPayment: <b>${inr(s.amount)}</b>\nPayment status: Pending.`);
+      await send(env, chatId, told && told.ok === false
+        ? `Submission #${s.id} approved → payment ${inr(s.amount)} set to Pending. ⚠️ Worker notify FAILED — message them manually.`
+        : `Submission #${s.id} approved → payment ${inr(s.amount)} set to Pending.`);
       return;
     }
     if (act === 'sub_no' && arg) {
@@ -355,8 +429,8 @@ async function onCb(env, cb) {
     }
     if (act === 'new') {
       await ack();
-      await setSess(env, from.id, 't_title', {});
-      await send(env, chatId, `➕ <b>New task</b> (${TFIELDS.length} questions, /cancel anytime).\n\nSend the <b>task title</b>.`);
+      await setSess(env, from.id, 'n_details', {});
+      await send(env, chatId, `➕ <b>New task.</b>\n\nSend <b>everything in one go</b> — title, client, subreddit, content, instructions, as one or more messages. Attach reference <b>photos</b> too if needed.\n\nWhen finished, send /done (or /cancel).`);
       return;
     }
     if (act === 'workers') {
@@ -394,6 +468,17 @@ async function onMsg(env, msg) {
 
   if (text.startsWith('/')) {
     const cmd = text.split(' ')[0].split('@')[0];
+    if (admin && (cmd === '/done' || cmd === '/cancel')) {
+      const s0 = await getSess(env, from.id);
+      if (s0.state && s0.state.startsWith('n_')) {
+        if (cmd === '/cancel') { await clearSess(env, from.id); return send(env, chatId, `Task creation cancelled.`); }
+        const d0 = { body: '', photos: [], ...(s0.data || {}) };
+        if (!d0.body && !d0.photos.length) return send(env, chatId, `Nothing yet — send the work details first (text/photos), then /done.`);
+        if (photoId && !d0.photos.includes(photoId)) d0.photos.push(photoId);
+        await setSess(env, from.id, 'n_amount', d0);
+        return send(env, chatId, `Got it. Payment in ₹ (plain number)?`);
+      }
+    }
     await clearSess(env, from.id);
     if (cmd === '/start') return cmdStart(env, chatId, from);
     if (cmd === '/help') return send(env, chatId, HELP + (admin ? `\n\n<b>Admin:</b> /admin /createtask` : ''));
@@ -407,8 +492,8 @@ async function onMsg(env, msg) {
     }
     if (cmd === '/createtask') {
       if (!admin) return send(env, chatId, `Admins only.`);
-      await setSess(env, from.id, 't_title', {});
-      return send(env, chatId, `➕ <b>New task</b> (${TFIELDS.length} questions, /cancel anytime).\n\nSend the <b>task title</b>.`);
+      await setSess(env, from.id, 'n_details', {});
+      return send(env, chatId, `➕ <b>New task.</b>\n\nSend <b>everything in one go</b> — title, client, subreddit, content, instructions, as one or more messages. Attach reference <b>photos</b> too if needed.\n\nWhen finished, send /done (or /cancel).`);
     }
     return send(env, chatId, `Unknown command. Try /help.`);
   }
@@ -418,16 +503,17 @@ async function onMsg(env, msg) {
     const user = parseReddit(text);
     if (!user && !photoId) { await send(env, chatId, `Couldn't read that. Send like <code>u/someone</code>, the full profile link — or just send a <b>screenshot photo</b> of your profile.`); return; }
     const proofType = photoId ? 'screenshot' : 'none';
+    const info0 = user ? await redditInfo(user) : null;
     await env.DB.prepare("INSERT INTO applications (tg_id, tg_username, reddit_user, proof_type, proof_file_id, status, created_at) VALUES (?,?,?,?,?,'pending',?)")
       .bind(from.id, from.username || '', user || '', proofType, photoId || '', now()).run();
-    await env.DB.prepare("INSERT INTO workers (tg_id, tg_username, reddit_user, status, created_at) VALUES (?,?,?,'pending',?) ON CONFLICT(tg_id) DO UPDATE SET tg_username=excluded.tg_username, reddit_user=excluded.reddit_user, status='pending'")
-      .bind(from.id, from.username || '', user || '', now()).run();
+    await env.DB.prepare("INSERT INTO workers (tg_id, tg_username, reddit_user, reddit_created, link_karma, comment_karma, status, created_at) VALUES (?,?,?,?,?,?,'pending',?) ON CONFLICT(tg_id) DO UPDATE SET tg_username=excluded.tg_username, reddit_user=excluded.reddit_user, reddit_created=excluded.reddit_created, link_karma=excluded.link_karma, comment_karma=excluded.comment_karma, status='pending'")
+      .bind(from.id, from.username || '', user || '', info0 ? info0.createdUtc : 0, info0 ? info0.linkN : 0, info0 ? info0.commentN : 0, now()).run();
     await clearSess(env, from.id);
     await send(env, chatId, `Your application has been submitted successfully.\n\nOur team will review your profile and get back to you here.`);
     for (const aid of String(env.ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean)) {
-      const info = user ? await redditInfo(user) : null;
+      const info = info0;
       const rline = user
-        ? `Reddit: u/${esc(user)} — https://www.reddit.com/user/${encodeURIComponent(user)}\n${info ? `Age: ${info.created} • karma ${info.link}/${info.comment}` : `Reddit info unavailable — check manually.`}`
+        ? `Reddit: u/${esc(user)} — https://www.reddit.com/user/${encodeURIComponent(user)}\n${info ? `Age: ${info.created} • karma ${info.link}/${info.comment} • quality-proxy: ${cqsTier(info.createdUtc ? Math.floor((now() - info.createdUtc) / 86400) : 0, info.linkN + info.commentN)}` : `Reddit info unavailable — check manually.`}`
         : `Reddit: 📷 screenshot only (private profile)`;
       const body = `📥 <b>New application</b>\nTelegram: @${esc(from.username || '?')} (<code>${from.id}</code>)\n${rline}\n\nUse /admin → Applications to decide.`;
       if (photoId) {
@@ -455,7 +541,7 @@ async function onMsg(env, msg) {
     }
     return;
   }
-  if (sess.state && sess.state.startsWith('t_') && admin) return taskWizard(env, chatId, from, text, sess);
+  if (sess.state && sess.state.startsWith('n_') && admin) return newTaskFlow(env, chatId, from, text, photoId, sess);
   if (sess.state === 'await_reject_reason' && admin) {
     const reason = text === '-' ? '' : text;
     const a = await env.DB.prepare('SELECT * FROM assignments WHERE id=?').bind(sess.data.assignment_id).first();
