@@ -58,3 +58,11 @@ CREATE TABLE IF NOT EXISTS sessions (
   state TEXT,
   data TEXT
 );
+-- Single source of truth: any application decision auto-syncs the worker row.
+-- Works whether the decision comes from the bot button or manual SQL.
+CREATE TRIGGER IF NOT EXISTS app_decision
+AFTER UPDATE OF status ON applications
+WHEN NEW.status IN ('approved', 'rejected')
+BEGIN
+  UPDATE workers SET status = NEW.status WHERE tg_id = NEW.tg_id;
+END;
