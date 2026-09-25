@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS applications (
   tg_id INTEGER,
   tg_username TEXT,
   reddit_user TEXT,
+  proof_type TEXT DEFAULT 'none',
+  proof_file_id TEXT DEFAULT '',
   status TEXT DEFAULT 'pending',
   created_at INTEGER,
   decided_at INTEGER

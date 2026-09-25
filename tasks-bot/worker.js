@@ -96,7 +96,7 @@ async function cmdProfile(env, chatId, from) {
   const pend = await env.DB.prepare("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE tg_id=? AND status='pending'").bind(from.id).first();
   const paid = await env.DB.prepare("SELECT COALESCE(SUM(amount),0) s FROM payments WHERE tg_id=? AND status='paid'").bind(from.id).first();
   await send(env, chatId,
-    `<b>👤 Profile</b>\nTelegram: @${esc(w.tg_username || from.username || '?')}\nReddit: u/${esc(w.reddit_user || '?')}\nApplication: <b>${esc(w.status)}</b>\nCompleted tasks: <b>${done.c}</b>\nPending payments: <b>${inr(pend.s)}</b>\nPaid total: <b>${inr(paid.s)}</b>`);
+    `<b>👤 Profile</b>\nTelegram: @${esc(w.tg_username || from.username || '?')}\nReddit: ${w.reddit_user ? `u/${esc(w.reddit_user)}` : `📷 screenshot on file`}\nApplication: <b>${esc(w.status)}</b>\nCompleted tasks: <b>${done.c}</b>\nPending payments: <b>${inr(pend.s)}</b>\nPaid total: <b>${inr(paid.s)}</b>`);
 }
 
 async function cmdTasks(env, chatId, from) {
@@ -156,16 +156,20 @@ async function listApps(env, chatId) {
   const rows = (await env.DB.prepare("SELECT * FROM applications WHERE status='pending' ORDER BY id DESC LIMIT 10").all()).results;
   if (!rows.length) { await send(env, chatId, `No pending applications. 🎉`); return; }
   for (const a of rows) {
-    const info = await redditInfo(a.reddit_user);
-    const rline = info
-      ? `Reddit age: ${info.created} • link karma ${info.link} • comment karma ${info.comment}`
-      : `Reddit public info unavailable — open profile manually.`;
-    await send(env, chatId,
-      `<b>📥 Application #${a.id}</b>\nTelegram: @${esc(a.tg_username || '?')} (<code>${a.tg_id}</code>)\nReddit: u/${esc(a.reddit_user)} — https://www.reddit.com/user/${encodeURIComponent(a.reddit_user)}\n${rline}\nDate: ${date(a.created_at)}\nStatus: <b>${a.status}</b>\n\n<i>Review history, karma, activity &amp; standing yourself — never auto-approve on karma alone.</i>`,
-      { reply_markup: { inline_keyboard: [[
+    const info = a.reddit_user ? await redditInfo(a.reddit_user) : null;
+    const rline = a.reddit_user
+      ? `Reddit: u/${esc(a.reddit_user)} — https://www.reddit.com/user/${encodeURIComponent(a.reddit_user)}\n${info ? `Reddit age: ${info.created} • link karma ${info.link} • comment karma ${info.comment}` : `Reddit public info unavailable — open profile manually.`}`
+      : `Reddit: 📷 screenshot only (private profile)`;
+    const body = `<b>📥 Application #${a.id}</b>\nTelegram: @${esc(a.tg_username || '?')} (<code>${a.tg_id}</code>)\n${rline}\nDate: ${date(a.created_at)}\nStatus: <b>${a.status}</b>\n\n<i>Review history, karma, activity &amp; standing yourself — never auto-approve on karma alone.</i>`;
+    const kb = { reply_markup: { inline_keyboard: [[
         { text: '✅ Approve', callback_data: `a:app_ok:${a.id}` },
         { text: '❌ Reject', callback_data: `a:app_no:${a.id}` },
-      ]]} });
+      ]]} };
+    if (a.proof_file_id) {
+      await tg(env, 'sendPhoto', { chat_id: chatId, photo: a.proof_file_id, caption: body.slice(0, 1000), parse_mode: 'HTML', ...kb }).catch(() => {});
+    } else {
+      await send(env, chatId, body, kb);
+    }
   }
 }
 
@@ -227,7 +231,7 @@ async function onCb(env, cb) {
     if (act === 'apply') {
       await ack();
       await setSess(env, from.id, 'await_reddit', {});
-      await send(env, chatId, `Please send your Reddit username or your public Reddit profile link.\n\n<i>We never ask for passwords or logins — username only.</i>`);
+      await send(env, chatId, `Please send your Reddit username or your public Reddit profile link.\n\nIf your profile is private, just send a <b>screenshot photo</b> instead.\n\n<i>We never ask for passwords or logins — username only.</i>`);
       return;
     }
     if (act === 'tasks') { await ack(); await cmdTasks(env, chatId, from); return; }
@@ -361,7 +365,7 @@ async function onCb(env, cb) {
       if (!rows.length) { await send(env, chatId, `No workers yet.`); return; }
       for (const w of rows) {
         await send(env, chatId,
-          `👤 @${esc(w.tg_username || '?')} (<code>${w.tg_id}</code>)\nReddit: u/${esc(w.reddit_user || '?')} • <b>${w.status}</b>`,
+          `👤 @${esc(w.tg_username || '?')} (<code>${w.tg_id}</code>)\nReddit: ${w.reddit_user ? `u/${esc(w.reddit_user)}` : `📷 screenshot`} • <b>${w.status}</b>`,
           w.status === 'approved'
             ? { reply_markup: { inline_keyboard: [[{ text: '⛔ Suspend', callback_data: `a:susp:${w.tg_id}` }]] } }
             : {});
@@ -383,8 +387,9 @@ async function onCb(env, cb) {
 
 // ================= MESSAGES =================
 async function onMsg(env, msg) {
-  const from = msg.from, chatId = msg.chat.id, text = (msg.text || '').trim();
-  if (!text) return;
+  const from = msg.from, chatId = msg.chat.id, text = (msg.text || msg.caption || '').trim();
+  const photoId = msg.photo && msg.photo.length ? msg.photo[msg.photo.length - 1].file_id : null;
+  if (!text && !photoId) return;
   const admin = isAdmin(env, from.id);
 
   if (text.startsWith('/')) {
@@ -411,17 +416,25 @@ async function onMsg(env, msg) {
   const sess = await getSess(env, from.id);
   if (sess.state === 'await_reddit') {
     const user = parseReddit(text);
-    if (!user) { await send(env, chatId, `Couldn't read that. Send like <code>u/someone</code> or the full profile link.`); return; }
-    await env.DB.prepare("INSERT INTO applications (tg_id, tg_username, reddit_user, status, created_at) VALUES (?,?,?,'pending',?)")
-      .bind(from.id, from.username || '', user, now()).run();
+    if (!user && !photoId) { await send(env, chatId, `Couldn't read that. Send like <code>u/someone</code>, the full profile link — or just send a <b>screenshot photo</b> of your profile.`); return; }
+    const proofType = photoId ? 'screenshot' : 'none';
+    await env.DB.prepare("INSERT INTO applications (tg_id, tg_username, reddit_user, proof_type, proof_file_id, status, created_at) VALUES (?,?,?,?,?,'pending',?)")
+      .bind(from.id, from.username || '', user || '', proofType, photoId || '', now()).run();
     await env.DB.prepare("INSERT INTO workers (tg_id, tg_username, reddit_user, status, created_at) VALUES (?,?,?,'pending',?) ON CONFLICT(tg_id) DO UPDATE SET tg_username=excluded.tg_username, reddit_user=excluded.reddit_user, status='pending'")
-      .bind(from.id, from.username || '', user, now()).run();
+      .bind(from.id, from.username || '', user || '', now()).run();
     await clearSess(env, from.id);
     await send(env, chatId, `Your application has been submitted successfully.\n\nOur team will review your profile and get back to you here.`);
     for (const aid of String(env.ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean)) {
-      const info = await redditInfo(user);
-      await send(env, +aid,
-        `📥 <b>New application</b>\nTelegram: @${esc(from.username || '?')} (<code>${from.id}</code>)\nReddit: u/${esc(user)} — https://www.reddit.com/user/${encodeURIComponent(user)}\n${info ? `Age: ${info.created} • karma ${info.link}/${info.comment}` : `Reddit info unavailable.`}\n\nUse /admin → Applications to decide.`).catch(() => {});
+      const info = user ? await redditInfo(user) : null;
+      const rline = user
+        ? `Reddit: u/${esc(user)} — https://www.reddit.com/user/${encodeURIComponent(user)}\n${info ? `Age: ${info.created} • karma ${info.link}/${info.comment}` : `Reddit info unavailable — check manually.`}`
+        : `Reddit: 📷 screenshot only (private profile)`;
+      const body = `📥 <b>New application</b>\nTelegram: @${esc(from.username || '?')} (<code>${from.id}</code>)\n${rline}\n\nUse /admin → Applications to decide.`;
+      if (photoId) {
+        await tg(env, 'sendPhoto', { chat_id: +aid, photo: photoId, caption: body.slice(0, 1000), parse_mode: 'HTML' }).catch(() => {});
+      } else {
+        await send(env, +aid, body).catch(() => {});
+      }
     }
     return;
   }
@@ -459,13 +472,20 @@ async function onMsg(env, msg) {
 
 export default {
   async fetch(req, env) {
+    // Health check
     if (req.method === 'GET') return new Response('SetupKaro Tasks bot alive ✓', { status: 200 });
+    if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
     let update;
-    try { update = await req.json(); } catch { return new Response('ok'); }
+    try { update = await req.json(); }
+    catch (e) { console.error('Invalid Telegram JSON:', e); return new Response('Invalid JSON', { status: 400 }); }
     try {
+      console.log('Telegram update received:', JSON.stringify(update).slice(0, 500));
       if (update.callback_query) await onCb(env, update.callback_query);
       else if (update.message) await onMsg(env, update.message);
-    } catch (e) { /* never fail the webhook */ }
-    return new Response('ok');
+    } catch (e) {
+      console.error('Telegram update error:', e);
+      return new Response('Internal error', { status: 500 });
+    }
+    return new Response('ok', { status: 200 });
   },
 };
