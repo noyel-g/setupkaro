@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111613">
+  <meta name="description" content="RunStats Studio — create and export beautiful running-statistics posters for your next run.">
+  <title>RunStats Studio — Run your story</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="RunStats Studio home">
+      <span class="brand-mark">↗</span>
+      <span>RunStats <small>STUDIO · RUN YOUR STORY</small></span>
+    </a>
+    <div class="top-actions">
+      <span class="local-badge"><i></i> Saved in this browser</span>
+      <button class="button button-primary" id="exportTop">Export PNG <span>↗</span></button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar sidebar-left">
+      <div class="panel-section">
+        <div class="eyebrow">01 / YOUR RUN</div>
+        <h2>Activity details</h2>
+        <label class="field"><span>Headline</span><input id="headline" maxlength="48" value="ONE MORE MILE."></label>
+        <div class="field-grid">
+          <label class="field"><span>Distance</span><input id="distance" value="10.00" maxlength="12"></label>
+          <label class="field"><span>Unit</span><select id="unit"><option>KM</option><option>MI</option></select></label>
+        </div>
+        <div class="field-grid">
+          <label class="field"><span>Duration</span><input id="duration" value="52:18" maxlength="16"></label>
+          <label class="field"><span>Pace</span><input id="pace" value="5:14 /km" maxlength="16"></label>
+        </div>
+        <div class="field-grid">
+          <label class="field"><span>Elevation</span><input id="elevation" value="128 m" maxlength="16"></label>
+          <label class="field"><span>Average HR</span><input id="heartrate" value="154 bpm" maxlength="16"></label>
+        </div>
+        <label class="field"><span>Date / route note</span><input id="date" value="SUNDAY · 6:12 AM" maxlength="40"></label>
+        <label class="field"><span>Runner name</span><input id="runner" value="YOUR NAME" maxlength="30"></label>
+      </div>
+
+      <div class="panel-section">
+        <div class="eyebrow">02 / YOUR PHOTO</div>
+        <h2>Background image</h2>
+        <label class="upload-control" for="photoInput">
+          <span class="upload-icon">＋</span>
+          <span><b>Choose a photo</b><small>JPG, PNG or WebP · stays on your device</small></span>
+        </label>
+        <input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <button class="button button-quiet full-width" id="removePhoto" disabled>Remove photo</button>
+        <p class="helper">A photo is optional. Your image is not uploaded to a server.</p>
+      </div>
+
+      <div class="panel-section">
+        <div class="eyebrow">03 / CANVAS</div>
+        <h2>Export format</h2>
+        <label class="field"><span>Canvas size</span>
+          <select id="canvasSize">
+            <option value="portrait">Portrait post · 1080 × 1350</option>
+            <option value="story">Story · 1080 × 1920</option>
+            <option value="square">Square · 1080 × 1080</option>
+            <option value="landscape">Landscape · 1600 × 900</option>
+          </select>
+        </label>
+        <label class="field"><span>Typeface</span>
+          <select id="fontChoice">
+            <option value="sans">Modern sans</option>
+            <option value="serif">Editorial serif</option>
+            <option value="mono">Technical mono</option>
+          </select>
+        </label>
+      </div>
+    </aside>
+
+    <section class="workspace" aria-label="Poster preview">
+      <div class="workspace-heading">
+        <div><h1>Poster editor</h1><p>Make your miles worth sharing.</p></div>
+        <div class="preview-meta"><span class="live-dot"></span> Live preview <span class="divider">·</span> <span id="dimensions">1080 × 1350 px</span></div>
+      </div>
+      <div class="canvas-stage">
+        <article id="poster" class="poster theme-lime layout-classic">
+          <img id="posterPhoto" class="poster-photo" alt="">
+          <div class="photo-shade"></div>
+          <div class="poster-art poster-orbit"></div>
+          <div class="poster-topline"><span class="tiny-mark">●</span><span id="previewDate">SUNDAY · 6:12 AM</span><span class="topline-spacer"></span><span>RUN LOG / 01</span></div>
+          <div class="poster-headline" id="previewHeadline">ONE MORE <em>MILE.</em></div>
+          <div class="poster-distance"><span id="previewDistance">10.00</span><small id="previewUnit">KM</small></div>
+          <div class="poster-stats" id="posterStats">
+            <div class="poster-stat" data-stat="duration"><span>TIME</span><strong id="previewDuration">52:18</strong></div>
+            <div class="poster-stat" data-stat="pace"><span>PACE</span><strong id="previewPace">5:14 /km</strong></div>
+            <div class="poster-stat" data-stat="elevation"><span>ELEVATION</span><strong id="previewElevation">128 m</strong></div>
+            <div class="poster-stat" data-stat="heartrate"><span>AVG. HEART RATE</span><strong id="previewHeartrate">154 bpm</strong></div>
+          </div>
+          <div class="poster-footer"><span id="previewRunner">YOUR NAME</span><span class="footer-brand">RUN YOUR STORY <b>↗</b></span></div>
+        </article>
+      </div>
+      <div class="workspace-footer">
+        <span>✳ Built for the miles that matter.</span>
+        <span>PNG export · 2× resolution</span>
+      </div>
+      <div class="mobile-tools">
+        <button class="button button-primary" id="mobileExport">Export PNG ↗</button>
+        <button class="button" id="saveDesign">Save design</button>
+      </div>
+    </section>
+
+    <aside class="sidebar sidebar-right">
+      <div class="panel-section">
+        <div class="eyebrow">04 / ART DIRECTION</div>
+        <h2>Choose a palette</h2>
+        <div class="themes">
+          <button class="theme-option selected" data-theme="lime"><span class="theme-preview preview-lime"><b>RUN<br>YOUR<br>STORY.</b><small>10 KM ↗</small></span><span>Acid lime</span></button>
+          <button class="theme-option" data-theme="paper"><span class="theme-preview preview-paper"><b>FIELD<br>NOTES.</b><small>RUN LOG / 01</small></span><span>Field notes</span></button>
+          <button class="theme-option" data-theme="night"><span class="theme-preview preview-night"><b>BUILT<br>BY MILES.</b><small>PACE / DATA</small></span><span>Night run</span></button>
+          <button class="theme-option" data-theme="coral"><span class="theme-preview preview-coral"><b>OUT<br>THERE.</b><small>RUN CLUB ↗</small></span><span>Coral pop</span></button>
+          <button class="theme-option" data-theme="blue"><span class="theme-preview preview-blue"><b>FIND<br>YOUR<br>PACE.</b><small>KEEP MOVING</small></span><span>Track blue</span></button>
+          <button class="theme-option" data-theme="violet"><span class="theme-preview preview-violet"><b>NO<br>SHORTCUTS.</b><small>ONE MORE</small></span><span>Violet hour</span></button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="eyebrow">05 / COMPOSITION</div>
+        <h2>Layout style</h2>
+        <div class="layout-options">
+          <button class="layout-option selected" data-layout="classic"><span class="layout-icon classic-icon">Aa</span><span><b>Classic</b><small>Balanced and bold</small></span></button>
+          <button class="layout-option" data-layout="editorial"><span class="layout-icon editorial-icon">Ag</span><span><b>Editorial</b><small>Quiet, magazine-like</small></span></button>
+          <button class="layout-option" data-layout="impact"><span class="layout-icon impact-icon">10</span><span><b>Impact</b><small>Big type, big energy</small></span></button>
+        </div>
+        <label class="field slider-field"><span>Headline size <b id="headlineSizeValue">100%</b></span><input id="headlineSize" type="range" min="75" max="125" value="100"></label>
+        <label class="field"><span>Background detail</span>
+          <select id="texture">
+            <option value="orbit">Orbit lines</option>
+            <option value="grid">Technical grid</option>
+            <option value="plain">Plain</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="panel-section">
+        <div class="eyebrow">06 / STATISTICS</div>
+        <h2>Show on poster</h2>
+        <div class="toggle-grid">
+          <label class="toggle"><input type="checkbox" data-toggle="duration" checked><span>Time</span></label>
+          <label class="toggle"><input type="checkbox" data-toggle="pace" checked><span>Pace</span></label>
+          <label class="toggle"><input type="checkbox" data-toggle="elevation" checked><span>Elevation</span></label>
+          <label class="toggle"><input type="checkbox" data-toggle="heartrate" checked><span>Avg. HR</span></label>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="eyebrow">07 / YOUR DESIGNS</div>
+        <h2>Browser saves</h2>
+        <label class="field"><span>Design name</span><input id="designName" maxlength="40" placeholder="e.g. Sunday long run"></label>
+        <button class="button full-width" id="saveDesignDesktop">Save this design</button>
+        <div id="savedDesigns" class="saved-designs"><p class="empty-saves">Your saved designs will appear here.</p></div>
+        <p class="helper">Saved designs are stored in this browser only. Clearing browser data may remove them.</p>
+      </div>
+
+      <div class="panel-section export-panel">
+        <button class="button button-primary full-width" id="exportBottom">Download PNG <span>↗</span></button>
+        <button class="button button-quiet full-width" id="resetAll">Reset editor</button>
+        <p class="helper">No account. No tracking. No cloud upload required.</p>
+      </div>
+    </aside>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
