@@ -33,3 +33,79 @@
 @media(max-width:760px){.template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .poster-custom-text{font-size:clamp(10px,1.35vw,15px);font-weight:600;line-height:1.35;letter-spacing:.02em;margin:0 0 8px;overflow-wrap:anywhere}.poster-edit-mode .poster-custom-text{min-height:1em}
+
+
+/* Distinct art direction for each poster template */
+.poster-layout-editorial{padding:17px 15px 13px}
+.poster-layout-night-grid{background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px)!important;background-size:18px 18px!important}
+.poster-layout-night-grid .poster-top{color:#e3c66c}
+.poster-layout-night-grid .poster-title{font-size:clamp(30px,4.1vw,49px);letter-spacing:-2.5px;margin-top:33%;text-transform:uppercase}
+.poster-layout-night-grid .route-art{border-top:1px solid #ffffff30;padding-top:12px;height:25%}
+.poster-layout-type{padding:13px 12px 12px!important}
+.poster-layout-type .poster-top{font-size:5px}
+.poster-layout-type .poster-title{font-size:clamp(34px,5.2vw,59px);line-height:.78;letter-spacing:-3px;text-transform:uppercase;margin-top:16%;font-weight:800}
+.poster-layout-type .poster-title span:last-child{display:inline-block!important;background:#272821;color:#f9f5e9!important;padding:3px 5px;margin-top:5px}
+.poster-layout-type .route-art{height:15%;margin-bottom:8px}
+.poster-layout-type .poster-stats{border:0;gap:3px}
+.poster-layout-type .poster-stats>div{background:#282922;padding:7px 5px;color:#f9f5e9}
+.poster-layout-type .poster-stats strong{font-size:clamp(9px,1.2vw,13px)}
+.poster-layout-type .poster-stats small{font-size:4px}
+.poster-layout-sunrise{background:linear-gradient(155deg,#f8eed7 0 55%,#e9a27c 55% 72%,#b75c45 72% 100%)!important}
+.poster-layout-sunrise:before{content:"";position:absolute;width:47%;aspect-ratio:1;border-radius:50%;background:#e7b15d;top:22%;right:8%;opacity:.9}
+.poster-layout-sunrise .poster-top,.poster-layout-sunrise .poster-title,.poster-layout-sunrise .route-art,.poster-layout-sunrise .poster-stats,.poster-layout-sunrise .poster-bottom{z-index:1}
+.poster-layout-sunrise .poster-title{margin-top:25%;font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,43px);font-weight:500;letter-spacing:-1.6px}
+.poster-layout-sunrise .route-art{color:#402f2a;height:18%;margin-bottom:6px}
+.poster-layout-photo{background:linear-gradient(180deg,#202a25 0%,#5c7662 43%,#e7d9bd 43%,#e7d9bd 100%)!important;padding:14px 12px 12px!important}
+.poster-layout-photo .poster-top{color:#f8f5eb}
+.poster-layout-photo .poster-title{margin-top:38%;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(26px,3.6vw,42px);letter-spacing:-1px;color:#fffaf0}
+.poster-layout-photo .poster-title span:last-child{color:#fffaf0!important}
+.poster-layout-photo .route-art{height:17%;color:#263c30;margin-bottom:5px}
+.poster-layout-photo .poster-stats{background:#e7d9bd;color:#263c30;border-color:#263c30;padding:8px 5px}
+.poster-layout-photo .poster-bottom{color:#263c30}
+.poster-layout-personal-best{background:linear-gradient(135deg,#ed633b 0 52%,#f3b69a 52% 53%,#ed633b 53% 100%)!important}
+.poster-layout-personal-best .poster-title{font-size:clamp(31px,4.4vw,52px);font-weight:800;line-height:.83;letter-spacing:-2.7px;margin-top:28%}
+.poster-layout-personal-best .poster-title span:last-child{color:#f9f5e9!important}
+.poster-layout-personal-best .route-art{height:16%;margin-bottom:8px}
+.poster-layout-personal-best .poster-stats{border-top:3px solid #292a24;border-bottom:0;padding-top:10px}
+.poster-layout-quiet{background:#f0eee6!important}
+.poster-layout-quiet .poster-top{font-size:5px;color:#7d7a70}
+.poster-layout-quiet .poster-title{font-family:'Playfair Display',serif;font-size:clamp(27px,3.8vw,44px);font-weight:500;letter-spacing:-1px;line-height:1.02;margin-top:39%}
+.poster-layout-quiet .poster-title span:last-child{color:#7c8c76!important}
+.poster-layout-quiet .route-art{opacity:.35;height:16%}
+.poster-layout-quiet .poster-stats{border-top:1px solid #bcbdb2;border-bottom:0}
+.poster-layout-track{background:repeating-linear-gradient(135deg,#f1eee3 0 12px,#e6e0d1 12px 13px)!important}
+.poster-layout-track .poster-top{background:#272821;color:#f9f5e9;padding:7px;margin:-4px -4px 0}
+.poster-layout-track .poster-title{font-size:clamp(29px,4.3vw,49px);line-height:.85;letter-spacing:-2px;margin-top:24%;text-transform:uppercase}
+.poster-layout-track .route-art{background:#ed633b;padding:4px;height:19%;color:#272821;margin-bottom:8px}
+.poster-layout-track .poster-stats{background:#272821;color:#f9f5e9;padding:9px 6px;border:0}
+.poster-layout-track .poster-bottom{color:#272821}
+.poster-layout-route-map{background:#e4e9df!important}
+.poster-layout-route-map .poster-top{color:#45644f}
+.poster-layout-route-map .poster-title{font-family:'Playfair Display',serif;font-size:clamp(27px,3.7vw,43px);font-weight:500;letter-spacing:-1.3px;margin-top:16%}
+.poster-layout-route-map .route-art{height:32%;background:radial-gradient(circle at 25% 30%,#d2ddcd 0 2px,transparent 3px),radial-gradient(circle at 70% 60%,#d2ddcd 0 2px,transparent 3px);background-size:17px 17px;margin:12px -2px 8px;padding:5px;color:#426a50}
+.poster-layout-route-map .poster-stats{border-color:#9caf9c}
+.poster-layout-minimal-stats{background:#20231f!important;color:#f2efe5!important}
+.poster-layout-minimal-stats .poster-top{color:#d9d4c5}
+.poster-layout-minimal-stats .poster-title{font-size:clamp(27px,3.6vw,42px);letter-spacing:-1.5px;margin-top:20%;font-weight:500}
+.poster-layout-minimal-stats .route-art{display:none}
+.poster-layout-minimal-stats .poster-stats{display:flex;flex-direction:column;border:0;margin-top:auto;gap:0}
+.poster-layout-minimal-stats .poster-stats>div{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid #ffffff35;padding:9px 0}
+.poster-layout-minimal-stats .poster-stats strong{font-size:clamp(17px,2.2vw,25px)}
+.poster-layout-minimal-stats .poster-stats small{font-size:6px}
+.poster-layout-minimal-stats .poster-bottom{margin-top:12px;color:#e3c66c}
+.poster-layout-magazine{background:#d9e1dc!important;color:#26382f!important}
+.poster-layout-magazine .poster-top{border-bottom:1px solid #26382f;padding-bottom:8px}
+.poster-layout-magazine .poster-title{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,46px);font-weight:500;line-height:.94;letter-spacing:-1.7px;margin-top:18%;max-width:90%}
+.poster-layout-magazine .poster-title span:last-child{color:#b15b40!important}
+.poster-layout-magazine .route-art{height:24%;background:#c6d2ca;margin:10px -3px;padding:8px;color:#486653}
+.poster-layout-magazine .poster-stats{border-color:#8a9e90}
+.poster-layout-split{background:linear-gradient(90deg,#f8f4e8 0 58%,#d85f3c 58% 100%)!important;color:#252720!important}
+.poster-layout-split .poster-top{font-size:5px}
+.poster-layout-split .poster-title{font-size:clamp(26px,3.6vw,42px);letter-spacing:-2px;line-height:.88;margin-top:28%;max-width:85%}
+.poster-layout-split .poster-title span:last-child{color:#d85f3c!important}
+.poster-layout-split .route-art{height:18%;color:#252720;margin-bottom:9px}
+.poster-layout-split .poster-stats{border:0;display:flex;flex-direction:column;gap:4px;position:absolute;right:9px;top:34%;width:35%;color:#fff6e7}
+.poster-layout-split .poster-stats>div{border-bottom:1px solid #ffffff66;padding:5px 0}
+.poster-layout-split .poster-stats strong{font-size:clamp(10px,1.4vw,16px)}
+.poster-layout-split .poster-stats small{font-size:4px}
+.poster-layout-split .poster-bottom{margin-top:auto}
