@@ -41,6 +41,22 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
   const stats = <div className="poster-stats"><div><strong {...editProps("distance")}>{design?.distance ?? item.distance}</strong><small>KILOMETRES</small></div><div><strong {...editProps("time")}>{design?.time ?? item.time}</strong><small>TIME</small></div><div><strong {...editProps("pace")}>{design?.pace ?? item.pace}</strong><small>MIN / KM</small></div></div>;
   const top = <div className="poster-top"><span>RS / STUDIO</span><span {...editProps("date")}>{design?.date ?? item.date}</span></div>;
   const footer = <div className="poster-bottom"><span {...editProps("footer")}>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>;
+  const photoSources: Record<string, {src:string; alt:string}> = {
+    editorial: {src:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&q=85",alt:"Runner training on a road"},
+    "night-grid": {src:"https://images.unsplash.com/photo-1776935889501-68e5607fa42a?auto=format&fit=crop&w=900&q=85",alt:"Runner on a track at night"},
+    "type-poster": {src:"https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=900&q=85",alt:"Runner in motion"},
+    sunrise: {src:"https://images.unsplash.com/photo-1502904550040-7534597429ae?auto=format&fit=crop&w=900&q=85",alt:"Outdoor landscape at sunrise"},
+    "photo-frame": {src:"https://images.unsplash.com/photo-1517963879433-6ad2b056d712?auto=format&fit=crop&w=900&q=85",alt:"Athlete training"},
+    "personal-best": {src:"https://images.unsplash.com/photo-1533561052604-c3beb6d55b8d?auto=format&fit=crop&w=900&q=85",alt:"Runner on a track"},
+    quiet: {src:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=85",alt:"Quiet outdoor landscape"},
+    track: {src:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&q=85",alt:"Runner training"},
+    "route-map": {src:"https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=900&q=85",alt:"Forest trail"},
+    "minimal-stats": {src:"https://images.unsplash.com/photo-1461896836934- incoming?auto=format&fit=crop&w=900&q=85",alt:"Athlete running"},
+    magazine: {src:"https://images.unsplash.com/photo-1502904550040-7534597429ae?auto=format&fit=crop&w=900&q=85",alt:"Mountain landscape"},
+    split: {src:"https://images.unsplash.com/photo-1533561052604-c3beb6d55b8d?auto=format&fit=crop&w=900&q=85",alt:"Runner outdoors"},
+  };
+  const photo = photoSources[item.layout];
+  const photoLayer = photo ? <img className="poster-photo-layer" src={photo.src} alt={photo.alt} crossOrigin="anonymous" /> : null;
   const route = <div className="route-art" aria-label="Decorative running route map"><svg viewBox="0 0 300 110" role="img"><path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/><circle cx="8" cy="78" r="4" fill="currentColor"/><circle cx="292" cy="29" r="4" fill="currentColor"/></svg></div>;
   const layouts: Record<string, React.ReactNode> = {
     editorial: <>{top}<div className="poster-edition">FIELD NOTES / RUN LOG NO. 018</div>{title}{custom}<div className="poster-editorial-rule"/><div className="poster-route-caption">THE DISTANCE IS THE STORY <span>↘</span></div>{route}{stats}{footer}</>,
