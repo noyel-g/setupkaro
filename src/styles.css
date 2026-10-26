@@ -31,3 +31,5 @@
 .text-button{border:0;background:transparent;color:#a34d32;font-size:10px;text-decoration:underline;cursor:pointer;padding:8px}
 @media(max-width:1150px){.template-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.poster-custom-text{font-size:clamp(10px,1.35vw,15px);font-weight:600;line-height:1.35;letter-spacing:.02em;margin:0 0 8px;overflow-wrap:anywhere}.poster-edit-mode .poster-custom-text{min-height:1em}
