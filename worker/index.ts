@@ -4,7 +4,6 @@ interface Env {
   STRAVA_CLIENT_ID?: string;
   STRAVA_CLIENT_SECRET?: string;
   STRAVA_REDIRECT_URI?: string;
-  SESSION_SECRET?: string;
 }
 
 type StravaToken = {
@@ -35,7 +34,7 @@ const randomId = () => {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 };
 
-const missingSetup = (env: Env) => !env.STRAVA_CLIENT_ID || !env.STRAVA_CLIENT_SECRET || !env.STRAVA_REDIRECT_URI || !env.SESSION_SECRET || !env.DB;
+const missingSetup = (env: Env) => !env.STRAVA_CLIENT_ID || !env.STRAVA_CLIENT_SECRET || !env.STRAVA_REDIRECT_URI || !env.DB;
 
 async function getSession(request: Request, env: Env) {
   if (!env.DB) return null;
@@ -84,8 +83,7 @@ export default {
         stage: "strava-oauth",
         stravaConfigured: Boolean(env.STRAVA_CLIENT_ID && env.STRAVA_CLIENT_SECRET && env.STRAVA_REDIRECT_URI),
         databaseConfigured: Boolean(env.DB),
-        sessionSecretConfigured: Boolean(env.SESSION_SECRET)
-      });
+              });
     }
 
     if (url.pathname === "/api/auth/strava/start") {
@@ -127,8 +125,7 @@ export default {
           client_id: env.STRAVA_CLIENT_ID!,
           client_secret: env.STRAVA_CLIENT_SECRET!,
           code,
-          grant_type: "authorization_code",
-          client_secret: env.STRAVA_CLIENT_SECRET!
+          grant_type: "authorization_code"
         })
       });
       if (!tokenResponse.ok) return json({ error: "Strava token exchange failed. Check your client credentials and redirect URI." }, 502, { "set-cookie": clearState });
@@ -143,14 +140,10 @@ export default {
       const sessionId = randomId();
       const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
       await env.DB!.prepare("INSERT INTO app_sessions (session_id, athlete_id, expires_at) VALUES (?, ?, ?)").bind(sessionId, athlete.id, expiresAt).run();
-      return new Response(null, {
-        status: 302,
-        headers: {
-          location: new URL("/?strava=connected", url.origin).toString(),
-          "cache-control": "no-store",
-          "set-cookie": [cookieHeader("rs_session", sessionId, 60 * 60 * 24 * 30), clearState].join(", ")
-        }
-      });
+      const redirectHeaders = new Headers({ location: new URL("/?strava=connected", url.origin).toString(), "cache-control": "no-store" });
+      redirectHeaders.append("set-cookie", cookieHeader("rs_session", sessionId, 60 * 60 * 24 * 30));
+      redirectHeaders.append("set-cookie", clearState);
+      return new Response(null, { status: 302, headers: redirectHeaders });
     }
 
     if (url.pathname === "/api/auth/me") {
