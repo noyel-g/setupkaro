@@ -1,16 +1,13 @@
 # RunStats Studio
 
-A Strava-powered running poster generator. Runners will connect their Strava account, choose an activity, select a published template, customize a poster, and export a shareable image. Admins will create and publish templates through an admin interface.
-
-## Current milestone: Step 1 — Foundation
-
-This commit establishes the Vite + React + TypeScript frontend, a Cloudflare Worker API entry point, a D1 schema migration, and deployment configuration. The Strava integration, editor, and template administration are intentionally not enabled yet.
+A Strava-powered running poster generator. The current frontend includes a template gallery and a client-side poster editor/PNG export. The Worker now has the first Strava OAuth and activity API routes; those routes remain unavailable until the D1 database binding and Strava secrets are configured.
 
 ## Requirements
 
 - Node.js 20 or newer
 - npm
-- A Cloudflare account for deployment (not required for local frontend development)
+- Cloudflare account for deployment
+- Strava API application for OAuth
 
 ## Local development
 
@@ -25,32 +22,37 @@ npm run dev
 npm run build
 ```
 
-## Cloudflare setup
+## Cloudflare and Strava setup
 
-1. Create a D1 database named `runstats-studio-db`.
-2. Replace `REPLACE_WITH_D1_DATABASE_ID` in `wrangler.jsonc` with the database ID.
-3. Add the required Strava configuration as Worker secrets only when we implement OAuth:
-   - `STRAVA_CLIENT_ID`
-   - `STRAVA_CLIENT_SECRET`
-   - `STRAVA_REDIRECT_URI`
-   - `SESSION_SECRET`
-4. Build and deploy with `npm run deploy`.
+Do not commit secrets, access tokens, refresh tokens, or `.dev.vars`.
 
-Do not commit credentials or `.dev.vars`. The frontend must never receive the Strava client secret.
+1. In the Cloudflare dashboard, create a D1 database named `runstats-studio-db`.
+2. Copy its database ID. Add the D1 binding in `wrangler.jsonc` with binding name `DB`, database name `runstats-studio-db`, and that real database ID. Do not use a placeholder ID.
+3. Apply migrations to the remote database after the binding is configured:
+   `npx wrangler d1 migrations apply runstats-studio-db --remote`
+4. Create a Strava API application at the Strava developer settings. Set its Authorization Callback Domain to the deployed Worker hostname (hostname only, no protocol or path).
+5. Set these as Cloudflare Worker secrets/variables (never in frontend code):
+   - `STRAVA_CLIENT_ID` — the client ID from your Strava API application
+   - `STRAVA_CLIENT_SECRET` — the client secret, stored as a secret
+   - `STRAVA_REDIRECT_URI` — the full callback URL, for example `https://YOUR-WORKER-HOSTNAME/api/auth/strava/callback`; use your actual deployed hostname
+6. In the Strava app, ensure the callback URL's domain matches the Authorization Callback Domain.
+7. Deploy the latest `main` branch and check `/api/health`. It should report `databaseConfigured: true` and `stravaConfigured: true`.
+
+OAuth requests ask for `read,activity:read_all`. Access and refresh tokens are stored server-side in D1, not sent to the frontend. The browser receives an HttpOnly session cookie. The application has not yet been tested end-to-end against a real Strava account.
 
 ## Project structure
 
-- `src/`: React frontend, UI, and poster templates
-- `worker/index.ts`: Cloudflare Worker API entry point
+- `src/`: React frontend, UI, template previews, editor and PNG export
+- `worker/index.ts`: Cloudflare Worker, OAuth callback, session and activity endpoints
 - `migrations/`: D1 SQL migrations
 - `wrangler.jsonc`: Cloudflare Worker and static asset configuration
 
 ## Development stages
 
-1. Foundation
-2. Template gallery and UI
-3. Poster editor and image export
-4. Strava OAuth and activities
+1. Foundation and deployment
+2. Interactive template gallery
+3. Poster editor and PNG export
+4. Strava OAuth and activity API (routes implemented; configuration/testing pending)
 5. GPS route rendering
 6. Admin template builder
-7. Persistence, deployment, and end-to-end testing
+7. Persisted designs, final deployment and end-to-end testing
