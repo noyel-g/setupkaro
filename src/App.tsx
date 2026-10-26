@@ -26,19 +26,27 @@ const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
   orange: { bg: "#ee653d", ink: "#2a2a24", accent: "#f9f5e9" },
 };
 
-function Poster({ item, design }: { item: Template; design?: Design }) {
+function Poster({ item, design, editable = false, onEdit }: { item: Template; design?: Design; editable?: boolean; onEdit?: (key: keyof Design, value: string) => void }) {
   const style = design?.style ?? item.style;
   const headline = design?.headline ?? item.headline;
   const palette = palettes[style] ?? palettes.cream;
-  return <div className={`poster poster-${style}`} style={{ backgroundColor: palette.bg, color: palette.ink }}>
-    <div className="poster-top"><span>RS / STUDIO</span><span>{design?.date ?? item.date}</span></div>
-    <div className="poster-title" style={{ whiteSpace: "pre-line" }}>{headline.split("\n").map((line, index) => <span key={index} style={{ display: "block" }}>{line}</span>)}</div>
+  const editProps = (key: keyof Design) => editable ? {
+    contentEditable: true as const,
+    suppressContentEditableWarning: true,
+    spellCheck: false,
+    onBlur: (event: React.FocusEvent<HTMLElement>) => onEdit?.(key, event.currentTarget.innerText.replace(/\r/g, "")),
+    onClick: (event: React.MouseEvent<HTMLElement>) => event.stopPropagation(),
+    className: "canvas-editable",
+    title: "Click and type to edit",
+  } : {};
+  return <div className={`poster poster-${style} ${editable ? "poster-edit-mode" : ""}`} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? `linear-gradient(#00000022,#00000022), url("${design.backgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
+    <div className="poster-top"><span>RS / STUDIO</span><span {...editProps("date")}>{design?.date ?? item.date}</span></div>
+    <div className="poster-title" style={{ whiteSpace: "pre-line" }} {...editProps("headline")}>{headline}</div>
     <div className="route-art" aria-label="Decorative running route map"><svg viewBox="0 0 300 110" role="img"><path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/><circle cx="8" cy="78" r="4" fill="currentColor"/><circle cx="292" cy="29" r="4" fill="currentColor"/></svg></div>
-    <div className="poster-stats"><div><strong>{design?.distance ?? item.distance}</strong><small>KILOMETRES</small></div><div><strong>{design?.time ?? item.time}</strong><small>TIME</small></div><div><strong>{design?.pace ?? item.pace}</strong><small>MIN / KM</small></div></div>
-    <div className="poster-bottom"><span>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>
+    <div className="poster-stats"><div><strong {...editProps("distance")}>{design?.distance ?? item.distance}</strong><small>KILOMETRES</small></div><div><strong {...editProps("time")}>{design?.time ?? item.time}</strong><small>TIME</small></div><div><strong {...editProps("pace")}>{design?.pace ?? item.pace}</strong><small>MIN / KM</small></div></div>
+    <div className="poster-bottom"><span {...editProps("footer")}>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>
   </div>;
 }
-
 function downloadPoster(item: Template, design: Design) {
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
