@@ -121,6 +121,11 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
     return gpsPoints.map((p, i) => (i ? "L " : "M ") + (8 + (p[1] - minLng) / (maxLng - minLng || 1) * 284) + " " + (102 - (p[0] - minLat) / (maxLat - minLat || 1) * 94)).join(" ");
   })() : "";
+  const gpsPathTall = gpsPoints.length > 1 ? (() => {
+    const lats=gpsPoints.map((p)=>p[0]),lngs=gpsPoints.map((p)=>p[1]);
+    const minLat=Math.min(...lats),maxLat=Math.max(...lats),minLng=Math.min(...lngs),maxLng=Math.max(...lngs);
+    return gpsPoints.map((p,i)=>(i?"L ":"M ")+(8+(p[1]-minLng)/(maxLng-minLng||1)*284)+" "+(232-(p[0]-minLat)/(maxLat-minLat||1)*224)).join(" ");
+  })() : "";
   const route = <div className="route-art" aria-label={gpsPath ? "GPS route from Strava" : "Decorative running route map"}><svg viewBox="0 0 300 110" role="img">{gpsPath ? <path d={gpsPath} fill="none" stroke="#ed633b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/> : <path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/>}</svg></div>;
   const layouts: Record<string, React.ReactNode> = {
     editorial: <>{top}<div className="poster-edition">FIELD NOTES / RUN LOG NO. 018</div>{title}{custom}<div className="poster-editorial-rule"/><div className="poster-route-caption">THE DISTANCE IS THE STORY <span>↘</span></div>{route}{stats}{footer}</>,
@@ -131,7 +136,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     "personal-best": <><div className="poster-pb-kicker">THE WORK PAID OFF</div>{top}{title}<div className="poster-pb-medal"><span>PB</span><b {...editProps("time")}>{design?.time ?? item.time}</b><small>NEW PERSONAL BEST</small></div>{custom}{stats}{footer}</>,
     quiet: <><div className="poster-quiet-mark">○</div>{top}<div className="poster-quiet-title">{title}<span>somewhere between breath and belief.</span></div>{custom}{route}{stats}{footer}</>,
     track: <><div className="poster-track-header"><span>SESSION 08</span><span>400M REPEATS</span></div>{title}<div className="poster-track-lanes"><i/><i/><i/><i/><b>PACE YOURSELF</b></div>{custom}{stats}{footer}</>,
-    "route-map": <>{top}<div className="poster-map-heading">{title}<span>GPS TRACE / OUT & BACK</span></div><div className="poster-map-visual"><svg viewBox="0 0 300 240" role="img"><path d="M18 190 L42 160 L36 130 L82 116 L96 78 L137 91 L154 46 L185 62 L202 104 L238 111 L258 76 L284 88 L266 132 L231 150 L220 191 L175 202 L149 170 L103 190 L72 174 L42 205 Z" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M18 190 C48 174 43 134 82 116 S106 91 137 91 S139 48 185 62 S211 121 258 76" fill="none" stroke="#ed633b" strokeWidth="5" strokeLinecap="round"/><circle cx="18" cy="190" r="6" fill="#ed633b"/><circle cx="258" cy="76" r="6" fill="#ed633b"/></svg><span>START ●</span><span>FINISH ↗</span></div>{custom}{stats}{footer}</>,
+    "route-map": <>{top}<div className="poster-map-heading">{title}<span>GPS TRACE / OUT & BACK</span></div><div className="poster-map-visual">{gpsPathTall ? <svg viewBox="0 0 300 240" role="img"><path d={gpsPathTall} fill="none" stroke="#ed633b" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/></svg> : <svg viewBox="0 0 300 240" role="img"><path d="M18 190 L42 160 L36 130 L82 116 L96 78 L137 91 L154 46 L185 62 L202 104 L238 111 L258 76 L284 88 L266 132 L231 150 L220 191 L175 202 L149 170 L103 190 L72 174 L42 205 Z" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M18 190 C48 174 43 134 82 116 S106 91 137 91 S139 48 185 62 S211 121 258 76" fill="none" stroke="#ed633b" strokeWidth="5" strokeLinecap="round"/><circle cx="18" cy="190" r="6" fill="#ed633b"/><circle cx="258" cy="76" r="6" fill="#ed633b"/></svg>}<span>START ●</span><span>FINISH ↗</span></div>{custom}{stats}{footer}</>,
     "minimal-stats": <><div className="poster-minimal-label">TODAY, WELL SPENT.</div>{top}{title}{custom}<div className="poster-minimal-hero-number">{design?.distance ?? item.distance}<small>KM COMPLETED</small></div><div className="poster-minimal-secondary">{stats}</div>{footer}</>,
     magazine: <><div className="poster-magazine-masthead">PACE <span>THE RUN JOURNAL</span><b>№ 026</b></div>{title}<div className="poster-magazine-photo"><div className="poster-magazine-sun"/><div className="poster-magazine-hill"/><div className="poster-magazine-runner">↗</div><span>THE WEEKEND ISSUE</span></div>{custom}{stats}{footer}</>,
     split: <><div className="poster-split-copy">{top}{title}<div className="poster-split-vertical">RUN YOUR OWN RACE — SINCE ALWAYS</div>{custom}{footer}</div><div className="poster-split-data"><span>YOUR SESSION</span>{stats}<div className="poster-split-mark">RS<span>®</span></div></div></>,
@@ -163,6 +168,17 @@ async function downloadPoster(item: Template, design: Design) {
       ctx.drawImage(background, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
       ctx.fillStyle = "#00000022";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  if (design.activityOverlay) {
+    const overlay = new Image();
+    overlay.src = design.activityOverlay;
+    await new Promise<void>((resolve) => { overlay.onload = () => resolve(); overlay.onerror = () => resolve(); });
+    if (overlay.naturalWidth > 0 && overlay.naturalHeight > 0) {
+      const maxW = 860, maxH = 820;
+      const scale = Math.min(maxW / overlay.naturalWidth, maxH / overlay.naturalHeight);
+      const w = overlay.naturalWidth * scale, h = overlay.naturalHeight * scale;
+      ctx.drawImage(overlay, (canvas.width - w) / 2, 235 + (maxH - h) / 2, w, h);
     }
   }
   ctx.fillStyle = palette.ink;
