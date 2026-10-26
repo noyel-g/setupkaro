@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type React from "react";
-import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleHelp, Download, Flame, Footprints, MapPin, Plus, Route, Sparkles, Waves, X, Pencil, RotateCcw } from "lucide-react";
+import { Activity, ArrowDownRight, Check, ChevronDown, CircleHelp, Download, Flame, Footprints, MapPin, Plus, Route, Sparkles, X, Pencil, RotateCcw } from "lucide-react";
 
 const templates = [
   { id: "01", layout: "editorial", name: "The Sunday Long Run", kind: "EDITORIAL", style: "cream", distance: "21.10", time: "2:04:38", pace: "5:54", date: "SUNDAY, OCT 18", headline: "A LITTLE\nFARTHER." },
@@ -17,15 +17,57 @@ const templates = [
   { id: "12", layout: "split", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.\nYOUR PLACE." },
 ];
 type Template = typeof templates[number];
-type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string; customText: string; routePolyline?: string };
-type RunActivity = { id: number; name: string; type: string; sport_type?: string; start_date: string; distance: number; moving_time: number; total_elevation_gain?: number; average_heartrate?: number; map?: { summary_polyline?: string | null } };
-type Athlete = { id: number; firstname: string | null; lastname: string | null; profile: string | null };
+type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string; customText: string; routePolyline?: string; activityOverlay?: string };
 
 const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
   cream: { bg: "#f9f5e9", ink: "#262720", accent: "#ed633b" },
   dark: { bg: "#242824", ink: "#f0efe7", accent: "#e3c66c" },
   orange: { bg: "#ee653d", ink: "#2a2a24", accent: "#f9f5e9" },
 };
+
+function parseActivityFile(xmlText: string, fileName: string) {
+  const xml = new DOMParser().parseFromString(xmlText, "application/xml");
+  if (xml.querySelector("parsererror")) throw new Error("This route file is not valid GPX or TCX XML.");
+  const local = (node: Element, name: string) => Array.from(node.getElementsByTagName("*")).find((el) => el.localName.toLowerCase() === name.toLowerCase())?.textContent?.trim() ?? "";
+  const rows: Array<{ lat:number; lon:number; ele:number|null; time:number|null }> = [];
+  const gpx = Array.from(xml.getElementsByTagName("*")).filter((el) => ["trkpt","rtept"].includes(el.localName.toLowerCase()));
+  if (gpx.length) {
+    for (const node of gpx) {
+      const lat=Number(node.getAttribute("lat")),lon=Number(node.getAttribute("lon"));
+      if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;
+      const e=local(node,"ele"),t=local(node,"time");
+      rows.push({lat,lon,ele:e?Number(e):null,time:t?Date.parse(t):null});
+    }
+  } else {
+    const tcx=Array.from(xml.getElementsByTagName("*")).filter((el)=>el.localName.toLowerCase()==="trackpoint");
+    for(const node of tcx){
+      const lt=local(node,"LatitudeDegrees"),ln=local(node,"LongitudeDegrees");
+      if(!lt||!ln)continue;
+      const e=local(node,"AltitudeMeters"),t=local(node,"Time");
+      rows.push({lat:Number(lt),lon:Number(ln),ele:e?Number(e):null,time:t?Date.parse(t):null});
+    }
+  }
+  if(rows.length<2)throw new Error("No GPS points found. Export this activity as GPX or TCX and try again.");
+  const rad=(v:number)=>v*Math.PI/180;
+  let metres=0,gain=0;
+  for(let i=1;i<rows.length;i++){
+    const p=rows[i-1],q=rows[i],dLat=rad(q.lat-p.lat),dLon=rad(q.lon-p.lon);
+    const h=Math.sin(dLat/2)**2+Math.cos(rad(p.lat))*Math.cos(rad(q.lat))*Math.sin(dLon/2)**2;
+    metres+=6371000*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+    if(p.ele!==null&&q.ele!==null&&q.ele>p.ele)gain+=q.ele-p.ele;
+  }
+  const times=rows.map(p=>p.time).filter((t):t is number=>t!==null&&Number.isFinite(t));
+  const seconds=times.length>1?Math.max(0,Math.round((Math.max(...times)-Math.min(...times))/1000)):0;
+  const km=metres/1000, stride=Math.max(1,Math.ceil(rows.length/450));
+  const sampled=rows.filter((_,i)=>i===0||i===rows.length-1||i%stride===0);
+  let encoded="",lastLat=0,lastLon=0;
+  const emit=(n:number)=>{let v=n<0?~(n<<1):(n<<1);while(v>=0x20){encoded+=String.fromCharCode((0x20|(v&0x1f))+63);v>>=5;}encoded+=String.fromCharCode(v+63);};
+  sampled.forEach(p=>{const lat=Math.round(p.lat*1e5),lon=Math.round(p.lon*1e5);emit(lat-lastLat);emit(lon-lastLon);lastLat=lat;lastLon=lon;});
+  const date=times.length?new Date(Math.min(...times)):null;
+  const duration=Math.floor(seconds/3600)+":"+String(Math.floor(seconds%3600/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
+  const base=fileName.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").trim().toUpperCase();
+  return {headline:(base||"YOUR RUN").slice(0,40),distance:km.toFixed(2),time:duration,pace:seconds>0&&km>0?((seconds/60)/km).toFixed(2):"--",date:date?date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase():"ACTIVITY IMPORT",footer:Math.round(gain)+" M ELEVATION GAIN",routePolyline:encoded,pointCount:rows.length};
+}
 
 function decodeRoute(encoded: string) {
   const points: Array<[number, number]> = [];
@@ -95,7 +137,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     split: <><div className="poster-split-copy">{top}{title}<div className="poster-split-vertical">RUN YOUR OWN RACE — SINCE ALWAYS</div>{custom}{footer}</div><div className="poster-split-data"><span>YOUR SESSION</span>{stats}<div className="poster-split-mark">RS<span>®</span></div></div></>,
   };
   return <div className={"poster poster-" + style + " poster-layout-" + item.layout + (editable ? " poster-edit-mode" : "")} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? 'linear-gradient(#00000022,#00000022), url("' + design.backgroundImage + '")' : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
-    {photoLayer}{layouts[item.layout] ?? <>{top}{title}{custom}{route}{stats}{footer}</>}
+    {photoLayer}{design?.activityOverlay && <img className="poster-activity-overlay" src={design.activityOverlay} alt="Uploaded transparent activity graphic" />}{layouts[item.layout] ?? <>{top}{title}{custom}{route}{stats}{footer}</>}
   </div>;
 }
 async function downloadPoster(item: Template, design: Design) {
@@ -180,62 +222,46 @@ export default function App() {
   const [selected, setSelected] = useState<Template | null>(null);
   const [design, setDesign] = useState<Design | null>(null);
   const backgroundInputRef = useRef<HTMLInputElement>(null);
+  const activityImageInputRef = useRef<HTMLInputElement>(null);
+  const activityRouteInputRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState("");
-  const [athlete, setAthlete] = useState<Athlete | null>(null);
-  const [activities, setActivities] = useState<RunActivity[]>([]);
-  const [loadingActivities, setLoadingActivities] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [uploadedOverlay, setUploadedOverlay] = useState("");
+  const [routeImporting, setRouteImporting] = useState(false);
   const visibleTemplates = useMemo(() => filter === "ALL" ? templates : templates.filter((item) => item.kind === filter), [filter]);
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/auth/me", { credentials: "same-origin" })
-      .then((response) => response.ok ? response.json() : { connected: false })
-      .then((data: { connected?: boolean; athlete?: Athlete }) => { if (active && data.connected && data.athlete) setAthlete(data.athlete); })
-      .catch(() => undefined)
-      .finally(() => { if (active) setAuthChecked(true); });
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("strava") === "connected") setNotice("Strava connected successfully. Your activity import is ready for the next step.");
-    if (params.get("strava") === "cancelled") setNotice("Strava connection was cancelled.");
-    if (params.has("strava")) { params.delete("strava"); const query = params.toString(); window.history.replaceState({}, "", window.location.pathname + (query ? "?" + query : "") + window.location.hash); }
-    return () => { active = false; };
-  }, []);
-
-  const connectStrava = () => { window.location.assign("/api/auth/strava/start"); };
-  const disconnectStrava = async () => {
-    try { await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }); }
-    finally { setAthlete(null); setNotice("Strava disconnected from this workspace."); }
-  };
 
   const openEditor = (item: Template) => {
     setSelected(item);
-    setDesign({ headline: item.headline, distance: item.distance, time: item.time, pace: item.pace, date: item.date, footer: "ONE RUN AT A TIME.", style: item.style, backgroundImage: "", customText: "", routePolyline: "" });
+    setDesign({headline:item.headline,distance:item.distance,time:item.time,pace:item.pace,date:item.date,footer:"ONE RUN AT A TIME.",style:item.style,backgroundImage:"",customText:"",routePolyline:"",activityOverlay:uploadedOverlay});
     setNotice("");
   };
   const closeEditor = () => { setSelected(null); setDesign(null); };
-  const loadActivities = async () => {
-    setLoadingActivities(true);
-    try {
-      const response = await fetch("/api/activities?per_page=30", { credentials: "same-origin" });
-      const data = await response.json() as { activities?: RunActivity[]; error?: string };
-      if (!response.ok) throw new Error(data.error || "Could not fetch activities.");
-      setActivities((data.activities || []).filter((a) => ["Run", "TrailRun", "VirtualRun", "Walk", "Hike"].includes(a.sport_type || a.type)));
-      setNotice("Loaded recent Strava activities. Choose a run to create a poster.");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not load activities."); }
-    finally { setLoadingActivities(false); }
+  const ensureEditor = (overlay:string) => {
+    const item=templates.find((t)=>t.layout==="route-map")??templates[0];
+    setSelected(item);
+    setDesign((current)=>current?{...current,activityOverlay:overlay}:{headline:item.headline,distance:item.distance,time:item.time,pace:item.pace,date:item.date,footer:"ONE RUN AT A TIME.",style:item.style,backgroundImage:"",customText:"",routePolyline:"",activityOverlay:overlay});
   };
-  const createFromActivity = async (a: RunActivity) => {
+  const handleActivityImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file=event.target.files?.[0]; if(!file)return;
+    if(!file.type.startsWith("image/")){setNotice("Choose a transparent PNG or other image file.");event.target.value="";return;}
+    if(file.size>10*1024*1024){setNotice("Choose an image smaller than 10 MB.");event.target.value="";return;}
+    const reader=new FileReader();
+    reader.onload=()=>{const image=String(reader.result??"");setUploadedOverlay(image);ensureEditor(image);setNotice("Activity image added. Upload the GPX/TCX export to calculate stats and draw the actual GPS route.");};
+    reader.onerror=()=>setNotice("Could not read that image. Try another file.");
+    reader.readAsDataURL(file);
+  };
+  const handleRouteFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file=event.target.files?.[0];if(!file)return;
+    if(!/\.(gpx|tcx)$/i.test(file.name)){setNotice("Upload a .gpx or .tcx export for the actual GPS route.");event.target.value="";return;}
+    if(file.size>15*1024*1024){setNotice("Choose a route file smaller than 15 MB.");event.target.value="";return;}
+    setRouteImporting(true);
     try {
-      const response = await fetch("/api/activities/" + a.id, { credentials: "same-origin" });
-      const data = await response.json() as { activity?: RunActivity & { summary_polyline?: string | null }; error?: string };
-      if (!response.ok || !data.activity) throw new Error(data.error || "Could not load activity route.");
-      const run = data.activity;
-      const item = templates.find((t) => t.layout === "route-map") || templates[0];
-      const seconds = run.moving_time || 0;
+      const parsed=parseActivityFile(await file.text(),file.name);
+      const item=templates.find((t)=>t.layout==="route-map")??templates[0];
       setSelected(item);
-      setDesign({ headline: (run.name || "YOUR RUN").toUpperCase().slice(0, 40), distance: (run.distance / 1000).toFixed(2), time: Math.floor(seconds / 3600) + ":" + String(Math.floor(seconds % 3600 / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0"), pace: run.distance > 0 ? ((seconds / 60) / (run.distance / 1000)).toFixed(2) : "--", date: new Date(run.start_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase(), footer: Math.round(run.total_elevation_gain || 0) + " M ELEVATION GAIN", style: "cream", backgroundImage: "", customText: run.average_heartrate ? "AVG HEART RATE " + Math.round(run.average_heartrate) + " BPM" : "", routePolyline: run.summary_polyline || "" });
-      setNotice("Poster populated with real activity stats and route data.");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create poster."); }
+      setDesign({headline:parsed.headline,distance:parsed.distance,time:parsed.time,pace:parsed.pace,date:parsed.date,footer:parsed.footer,style:"cream",backgroundImage:"",customText:"",routePolyline:parsed.routePolyline,activityOverlay:uploadedOverlay});
+      setNotice("Imported "+parsed.pointCount+" GPS points. Distance, pace, duration and elevation were calculated from the route file.");
+    } catch(error) { setNotice(error instanceof Error?error.message:"Could not import the activity file."); }
+    finally {setRouteImporting(false);event.target.value="";}
   };
   const updateDesign = (key: keyof Design, value: string) => setDesign((current) => current ? { ...current, [key]: value } : current);
 
@@ -245,24 +271,24 @@ export default function App() {
       <div className="side-label">WORKSPACE</div>
       <a className="nav-item active" href="#templates"><Sparkles size={17}/> Discover templates</a>
       <a className="nav-item" href="#editor" onClick={(event) => { event.preventDefault(); if (selected) setNotice("You're already in the poster editor."); else setNotice("Choose a template to open the poster editor."); }}><Pencil size={17}/> Poster editor <span className="nav-soon">BETA</span></a>
-      <a className="nav-item" href="#activities" onClick={(event) => { event.preventDefault(); setNotice("Activity import will be available after Strava connection is built."); }}><Route size={17}/> My activities <span className="nav-soon">SOON</span></a>
-      <div className="side-bottom"><div className="connect-card"><div className="connect-icon"><Waves size={18}/></div><strong>{athlete ? `Connected: ${athlete.firstname ?? "Strava"} ${athlete.lastname ?? ""}`.trim() : "Your runs, your story."}</strong><p>{athlete ? "Your Strava account is connected. Activity browsing is the next interface step." : "Connect Strava to turn your real activities into something worth keeping."}</p>{athlete ? <button className="connect-button connected-button" onClick={disconnectStrava}>Disconnect Strava <X size={14}/></button> : <button className="connect-button" onClick={connectStrava}>Connect Strava <ArrowUpRight size={15}/></button>}<small>{athlete ? "ACCOUNT CONNECTED" : authChecked ? "SECURE STRAVA OAUTH" : "CHECKING CONNECTION…"}</small></div><a className="nav-item muted" href="#help" onClick={(event) => { event.preventDefault(); setNotice("Help and feedback will be added as the app grows."); }}><CircleHelp size={17}/> Help & feedback</a><div className="profile"><div className="avatar">R</div><div><strong>{athlete ? `${athlete.firstname ?? "Strava"} ${athlete.lastname ?? ""}`.trim() : "Runner"}</strong><small>{athlete ? "Strava connected" : "Free workspace"}</small></div><ChevronDown size={16}/></div></div>
+      <a className="nav-item" href="#activities" onClick={(event) => { event.preventDefault(); document.getElementById("activities")?.scrollIntoView({behavior:"smooth"}); }}><Route size={17}/> Import activity</a>
+      <div className="side-bottom"><div className="connect-card"><div className="connect-icon"><Route size={18}/></div><strong>Your run, your story.</strong><p>Upload a transparent activity image and optional GPX/TCX route. No account needed.</p><button className="connect-button" onClick={() => document.getElementById("activities")?.scrollIntoView({behavior:"smooth"})}>Import activity <ArrowDownRight size={15}/></button><small>NO LOGIN REQUIRED</small></div><a className="nav-item muted" href="#help" onClick={(event) => { event.preventDefault(); setNotice("Help and feedback will be added as the app grows."); }}><CircleHelp size={17}/> Help & feedback</a><div className="profile"><div className="avatar">R</div><div><strong>Runner</strong><small>Free workspace</small></div><ChevronDown size={16}/></div></div>
     </aside>
     <section className="main-content">
       <header className="topbar"><div className="breadcrumbs">Workspace <span>/</span> <b>Discover</b></div><div className="top-actions"><span className="status-dot"/> <span className="saved-label">Template gallery ready</span><button className="help-button" aria-label="Help" onClick={() => setNotice("Choose a template to edit it. Changes appear in the live preview.")}><CircleHelp size={17}/></button></div></header>
       <div className="content-wrap">
         <div className="eyebrow"><span className="eyebrow-line"/> THE RUNNER'S CREATIVE STUDIO</div>
         <section className="hero"><div><h1>Your miles.<br/><em>Your masterpiece.</em></h1><p>Every run has a story. Give yours a place on the wall — with thoughtful, customisable posters made for runners.</p><a className="primary-button" href="#templates">Explore the templates <ArrowDownRight size={17}/></a></div><div className="hero-note"><div className="note-icon"><Flame size={20}/></div><div><strong>Made for the miles that matter.</strong><span>Long runs. First 5Ks. Ordinary Tuesdays.</span></div></div></section>
-        <section className="stats-strip"><div><span className="strip-icon"><Activity size={17}/></span><strong>YOUR DATA</strong><small>Real run stats, coming soon</small></div><div><span className="strip-icon"><MapPin size={17}/></span><strong>YOUR ROUTE</strong><small>Your path, drawn beautifully</small></div><div><span className="strip-icon"><Download size={17}/></span><strong>YOUR POSTER</strong><small>Export-ready designs</small></div></section>
-        <section className="activity-import" id="activities"><div className="activity-account-status">{athlete ? "✓ STRAVA CONNECTED" : "STRAVA NOT CONNECTED — CONNECT YOUR ACCOUNT BELOW"}</div><div><div className="eyebrow small"><span className="eyebrow-line"/> YOUR STRAVA DATA</div><h2>Make a poster from a real run<span>.</span></h2><p>Fetch your recent activities, then choose one to import its stats and GPS route.</p></div><button className="primary-button" onClick={athlete ? loadActivities : connectStrava} disabled={loadingActivities}>{loadingActivities ? "Loading runs…" : athlete ? "Fetch my runs" : "Connect Strava to fetch runs"} <ArrowDownRight size={17}/></button>{activities.length > 0 && <div className="activity-list">{activities.map((a) => <button key={a.id} className="activity-row" onClick={() => createFromActivity(a)}><span className="activity-symbol"><Footprints size={17}/></span><span className="activity-name"><strong>{a.name}</strong><small>{new Date(a.start_date).toLocaleDateString()} · {a.sport_type || a.type}</small></span><b>{(a.distance / 1000).toFixed(2)} km</b><span>↗</span></button>)}</div>}</section><section className="template-section" id="templates"><div className="section-heading"><div><div className="eyebrow small"><span className="eyebrow-line"/> THE STARTING LINE</div><h2>Find your format<span>.</span></h2><p>Choose a design to customise your headline, stats, colors, and export a PNG.</p></div><div className="filter-wrap"><button className="filter-button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>{filter === "ALL" ? "All templates" : templates.find((item) => item.kind === filter)?.kind}<ChevronDown size={15}/></button>{filterOpen && <div className="filter-menu">{[["ALL", "All templates"], ["EDITORIAL", "Editorial"], ["DARK MODE", "Dark mode"], ["BOLD TYPE", "Bold type"], ["MINIMAL", "Minimal"]].map(([value, label]) => <button key={value} className={filter === value ? "filter-option selected" : "filter-option"} onClick={() => { setFilter(value); setFilterOpen(false); }}><span>{label}</span>{filter === value && <Check size={14}/>}</button>)}</div>}</div></div>
+        <section className="stats-strip"><div><span className="strip-icon"><Activity size={17}/></span><strong>YOUR DATA</strong><small>Import your own activity</small></div><div><span className="strip-icon"><MapPin size={17}/></span><strong>YOUR ROUTE</strong><small>GPS route from GPX/TCX</small></div><div><span className="strip-icon"><Download size={17}/></span><strong>YOUR POSTER</strong><small>Export-ready designs</small></div></section>
+        <section className="activity-import" id="activities"><div className="eyebrow small"><span className="eyebrow-line"/> ACTIVITY IMPORT / NO ACCOUNT REQUIRED</div><h2>Bring your run into the studio<span>.</span></h2><p className="activity-import-copy">Use your transparent activity graphic as a visual layer. Add the GPX/TCX export to calculate your run stats and draw the real GPS route.</p><div className="activity-upload-grid"><div className="activity-upload-card"><div className="activity-upload-icon"><Download size={20}/></div><strong>1. Transparent activity image</strong><p>Upload the PNG overlay saved from your activity. Transparent PNG works best.</p><input ref={activityImageInputRef} id="activity-image-input" type="file" accept="image/png,image/webp,image/jpeg" className="image-file-input" onChange={handleActivityImage}/><button className="secondary-button" onClick={()=>activityImageInputRef.current?.click()}><Plus size={15}/>{uploadedOverlay?"Replace activity image":"Upload transparent image"}</button>{uploadedOverlay&&<button className="text-button" onClick={()=>{setUploadedOverlay("");updateDesign("activityOverlay","");}}>Remove image</button>}</div><div className="activity-upload-card"><div className="activity-upload-icon"><Route size={20}/></div><strong>2. GPS route and statistics</strong><p>Upload a .gpx or .tcx export to calculate distance, duration, pace, elevation and route.</p><input ref={activityRouteInputRef} id="activity-route-input" type="file" accept=".gpx,.tcx,application/gpx+xml,application/vnd.garmin.tcx+xml" className="image-file-input" onChange={handleRouteFile}/><button className="primary-button" onClick={()=>activityRouteInputRef.current?.click()} disabled={routeImporting}><Plus size={15}/>{routeImporting?"Reading route…":"Upload GPX / TCX"}</button></div></div><div className="activity-import-note"><strong>Note:</strong> an image contains pixels, not raw GPS coordinates. The GPX/TCX file supplies the route and timestamps; the transparent image adds your saved activity graphic to the poster.</div></section><section className="template-section" id="templates"><div className="section-heading"><div><div className="eyebrow small"><span className="eyebrow-line"/> THE STARTING LINE</div><h2>Find your format<span>.</span></h2><p>Choose a design to customise your headline, stats, colors, and export a PNG.</p></div><div className="filter-wrap"><button className="filter-button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>{filter === "ALL" ? "All templates" : templates.find((item) => item.kind === filter)?.kind}<ChevronDown size={15}/></button>{filterOpen && <div className="filter-menu">{[["ALL", "All templates"], ["EDITORIAL", "Editorial"], ["DARK MODE", "Dark mode"], ["BOLD TYPE", "Bold type"], ["MINIMAL", "Minimal"]].map(([value, label]) => <button key={value} className={filter === value ? "filter-option selected" : "filter-option"} onClick={() => { setFilter(value); setFilterOpen(false); }}><span>{label}</span>{filter === value && <Check size={14}/>}</button>)}</div>}</div></div>
           <div className="template-grid">{visibleTemplates.map((item) => <article className="template-card" key={item.id}><button className="poster-pick" onClick={() => openEditor(item)} aria-label={`Edit ${item.name}`}><div className="poster-frame"><Poster item={item}/><span className="template-number">{item.id} / {String(templates.length).padStart(2, "0")}</span><span className="poster-hover-label">CUSTOMISE POSTER ↗</span></div></button><div className="template-info"><div><h3>{item.name}</h3><span className="template-kind">{item.kind}</span></div><button className="select-button" aria-label={`Edit ${item.name}`} title="Customize template" onClick={() => openEditor(item)}><Plus size={18}/></button></div></article>)}</div>
         </section>
-        <section className="bottom-banner"><div className="banner-symbol"><Footprints size={23}/></div><div><strong>Good things take miles.</strong><p>Personalise a poster with sample stats and export a PNG. Strava sync comes later.</p></div><span className="banner-tag">BUILT FOR RUNNERS, BY RUNNERS</span></section>
+        <section className="bottom-banner"><div className="banner-symbol"><Footprints size={23}/></div><div><strong>Good things take miles.</strong><p>Import an activity image or a GPX/TCX route file, then customise and export your poster.</p></div><span className="banner-tag">BUILT FOR RUNNERS, BY RUNNERS</span></section>
         <footer><span>© 2026 RUNSTATS STUDIO</span><span>MADE FOR THE LOVE OF THE RUN <span className="footer-heart">♥</span></span></footer>
       </div>
     </section>
     {notice && <div className="toast" role="status"><span>{notice}</span><button aria-label="Dismiss message" onClick={() => setNotice("")}><X size={15}/></button></div>}
-    {selected && design && <div className="modal-backdrop editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEditor(); }}><section className="template-modal editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title"><button className="modal-close" aria-label="Close editor" onClick={closeEditor}><X size={18}/></button><div className="editor-preview"><div className="eyebrow small"><span className="eyebrow-line"/> LIVE PREVIEW</div><div className="modal-poster canvas-poster"><Poster item={selected} design={design} editable onEdit={updateDesign}/></div><p className="preview-caption">Click any text on the poster to edit it directly · Sample stats only</p></div><div className="modal-details editor-controls"><div className="eyebrow small"><span className="eyebrow-line"/> POSTER WORKSPACE</div><h2 id="editor-title">Make it yours<span>.</span></h2><p className="editor-intro">Customise this design. Real Strava data will be connected in a later step.</p><label className="field-label" htmlFor="poster-headline">Headline <span>Use a new line for line breaks</span></label><textarea id="poster-headline" rows={2} maxLength={48} value={design.headline} onChange={(event) => updateDesign("headline", event.target.value)} /><div className="editor-fields"><label><span className="field-label">Distance (km)</span><input value={design.distance} maxLength={8} onChange={(event) => updateDesign("distance", event.target.value)} /></label><label><span className="field-label">Time</span><input value={design.time} maxLength={12} onChange={(event) => updateDesign("time", event.target.value)} /></label><label><span className="field-label">Pace (min/km)</span><input value={design.pace} maxLength={8} onChange={(event) => updateDesign("pace", event.target.value)} /></label></div><label className="field-label" htmlFor="poster-date">Date label</label><input id="poster-date" value={design.date} maxLength={28} onChange={(event) => updateDesign("date", event.target.value.toUpperCase())}/><label className="field-label" htmlFor="poster-footer">Footer message</label><input id="poster-footer" value={design.footer} maxLength={36} onChange={(event) => updateDesign("footer", event.target.value.toUpperCase())}/><div className="field-label">Extra text layer <span>Optional</span></div>
+    {selected && design && <div className="modal-backdrop editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEditor(); }}><section className="template-modal editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title"><button className="modal-close" aria-label="Close editor" onClick={closeEditor}><X size={18}/></button><div className="editor-preview"><div className="eyebrow small"><span className="eyebrow-line"/> LIVE PREVIEW</div><div className="modal-poster canvas-poster"><Poster item={selected} design={design} editable onEdit={updateDesign}/></div><p className="preview-caption">Click any text on the poster to edit it directly · Sample stats only</p></div><div className="modal-details editor-controls"><div className="eyebrow small"><span className="eyebrow-line"/> POSTER WORKSPACE</div><h2 id="editor-title">Make it yours<span>.</span></h2><p className="editor-intro">Customise your poster using imported activity data or enter the stats manually.</p><label className="field-label" htmlFor="poster-headline">Headline <span>Use a new line for line breaks</span></label><textarea id="poster-headline" rows={2} maxLength={48} value={design.headline} onChange={(event) => updateDesign("headline", event.target.value)} /><div className="editor-fields"><label><span className="field-label">Distance (km)</span><input value={design.distance} maxLength={8} onChange={(event) => updateDesign("distance", event.target.value)} /></label><label><span className="field-label">Time</span><input value={design.time} maxLength={12} onChange={(event) => updateDesign("time", event.target.value)} /></label><label><span className="field-label">Pace (min/km)</span><input value={design.pace} maxLength={8} onChange={(event) => updateDesign("pace", event.target.value)} /></label></div><label className="field-label" htmlFor="poster-date">Date label</label><input id="poster-date" value={design.date} maxLength={28} onChange={(event) => updateDesign("date", event.target.value.toUpperCase())}/><label className="field-label" htmlFor="poster-footer">Footer message</label><input id="poster-footer" value={design.footer} maxLength={36} onChange={(event) => updateDesign("footer", event.target.value.toUpperCase())}/><div className="field-label">Extra text layer <span>Optional</span></div>
           <input aria-label="Additional poster text" placeholder="Add a short line to your poster…" value={design.customText} maxLength={45} onChange={(event) => updateDesign("customText", event.target.value)} />
           <div className="field-label">Background image</div>
           <div className="background-tools">
