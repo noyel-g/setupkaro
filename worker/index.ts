@@ -82,8 +82,8 @@ export default {
         app: "RunStats Studio",
         stage: "strava-oauth",
         stravaConfigured: Boolean(env.STRAVA_CLIENT_ID && env.STRAVA_CLIENT_SECRET && env.STRAVA_REDIRECT_URI),
-        databaseConfigured: Boolean(env.DB),
-              });
+        databaseConfigured: Boolean(env.DB)
+      });
     }
 
     if (url.pathname === "/api/auth/strava/start") {
@@ -113,7 +113,7 @@ export default {
       const savedState = cookie(request, "rs_oauth_state");
       const clearState = "rs_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
       if (!state || !savedState || state !== savedState) return json({ error: "OAuth state check failed. Please start Strava connection again." }, 400, { "set-cookie": clearState });
-      if (url.searchParams.get("error")) return Response.redirect(new URL("/?strava=cancelled", url.origin).toString(), 303);
+      if (url.searchParams.get("error")) return new Response(null, { status: 303, headers: { location: new URL("/?strava=cancelled", url.origin).toString(), "set-cookie": clearState, "cache-control": "no-store" } });
       const code = url.searchParams.get("code");
       if (!code) return json({ error: "Strava did not return an authorization code." }, 400, { "set-cookie": clearState });
       if (missingSetup(env)) return json({ error: "Strava sign-in is not configured yet. Set the Worker secrets and D1 binding first." }, 503, { "set-cookie": clearState });
