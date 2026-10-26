@@ -3,18 +3,18 @@ import type React from "react";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleHelp, Download, Flame, Footprints, MapPin, Plus, Route, Sparkles, Waves, X, Pencil, RotateCcw } from "lucide-react";
 
 const templates = [
-  { id: "01", name: "The Sunday Long Run", kind: "EDITORIAL", style: "cream", distance: "21.10", time: "2:04:38", pace: "5:54", date: "SUNDAY, OCT 18", headline: "A LITTLE\nFARTHER." },
-  { id: "02", name: "After Hours", kind: "DARK MODE", style: "dark", distance: "10.02", time: "48:12", pace: "4:48", date: "THURSDAY, OCT 22", headline: "NIGHT\nMILES." },
-  { id: "03", name: "Just Keep Going", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "26:40", pace: "5:20", date: "TUESDAY, OCT 20", headline: "SHOW UP.\nRUN ON." },
-  { id: "04", name: "First Light", kind: "MINIMAL", style: "cream", distance: "8.24", time: "42:18", pace: "5:08", date: "MONDAY, OCT 19", headline: "MEET ME\nAT DAWN." },
-  { id: "05", name: "Midnight Club", kind: "DARK MODE", style: "dark", distance: "12.00", time: "1:02:44", pace: "5:14", date: "FRIDAY, OCT 16", headline: "CITY\nSLEEPING." },
-  { id: "06", name: "Personal Best", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "24:58", pace: "4:59", date: "SATURDAY, OCT 17", headline: "NEW\nPERSONAL BEST." },
-  { id: "07", name: "Quiet Miles", kind: "MINIMAL", style: "cream", distance: "6.50", time: "35:20", pace: "5:26", date: "WEDNESDAY, OCT 21", headline: "JUST ME\nAND THE ROAD." },
-  { id: "08", name: "Track Session", kind: "BOLD TYPE", style: "orange", distance: "7.20", time: "34:12", pace: "4:45", date: "TUESDAY, OCT 13", headline: "ONE MORE\nREPEAT." },
-  { id: "09", name: "The Long Way Home", kind: "EDITORIAL", style: "cream", distance: "18.60", time: "1:48:30", pace: "5:50", date: "SUNDAY, OCT 11", headline: "TAKE THE\nLONG WAY." },
-  { id: "10", name: "No Days Wasted", kind: "DARK MODE", style: "dark", distance: "4.80", time: "25:40", pace: "5:21", date: "THURSDAY, OCT 15", headline: "SMALL STEPS.\nBIG DAYS." },
-  { id: "11", name: "Weekend Ritual", kind: "EDITORIAL", style: "cream", distance: "10.00", time: "51:06", pace: "5:06", date: "SATURDAY, OCT 10", headline: "SAME TIME.\nSAME JOY." },
-  { id: "12", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.\nYOUR PLACE." },
+  { id: "01", layout: "editorial", name: "The Sunday Long Run", kind: "EDITORIAL", style: "cream", distance: "21.10", time: "2:04:38", pace: "5:54", date: "SUNDAY, OCT 18", headline: "A LITTLE\nFARTHER." },
+  { id: "02", layout: "night-grid", name: "After Hours", kind: "DARK MODE", style: "dark", distance: "10.02", time: "48:12", pace: "4:48", date: "THURSDAY, OCT 22", headline: "NIGHT\nMILES." },
+  { id: "03", layout: "type-poster", name: "Just Keep Going", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "26:40", pace: "5:20", date: "TUESDAY, OCT 20", headline: "SHOW UP.\nRUN ON." },
+  { id: "04", layout: "sunrise", name: "First Light", kind: "MINIMAL", style: "cream", distance: "8.24", time: "42:18", pace: "5:08", date: "MONDAY, OCT 19", headline: "MEET ME\nAT DAWN." },
+  { id: "05", layout: "photo-frame", name: "Midnight Club", kind: "DARK MODE", style: "dark", distance: "12.00", time: "1:02:44", pace: "5:14", date: "FRIDAY, OCT 16", headline: "CITY\nSLEEPING." },
+  { id: "06", layout: "personal-best", name: "Personal Best", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "24:58", pace: "4:59", date: "SATURDAY, OCT 17", headline: "NEW\nPERSONAL BEST." },
+  { id: "07", layout: "quiet", name: "Quiet Miles", kind: "MINIMAL", style: "cream", distance: "6.50", time: "35:20", pace: "5:26", date: "WEDNESDAY, OCT 21", headline: "JUST ME\nAND THE ROAD." },
+  { id: "08", layout: "track", name: "Track Session", kind: "BOLD TYPE", style: "orange", distance: "7.20", time: "34:12", pace: "4:45", date: "TUESDAY, OCT 13", headline: "ONE MORE\nREPEAT." },
+  { id: "09", layout: "route-map", name: "The Long Way Home", kind: "EDITORIAL", style: "cream", distance: "18.60", time: "1:48:30", pace: "5:50", date: "SUNDAY, OCT 11", headline: "TAKE THE\nLONG WAY." },
+  { id: "10", layout: "minimal-stats", name: "No Days Wasted", kind: "DARK MODE", style: "dark", distance: "4.80", time: "25:40", pace: "5:21", date: "THURSDAY, OCT 15", headline: "SMALL STEPS.\nBIG DAYS." },
+  { id: "11", layout: "magazine", name: "Weekend Ritual", kind: "EDITORIAL", style: "cream", distance: "10.00", time: "51:06", pace: "5:06", date: "SATURDAY, OCT 10", headline: "SAME TIME.\nSAME JOY." },
+  { id: "12", layout: "split", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.\nYOUR PLACE." },
 ];
 type Template = typeof templates[number];
 type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string; customText: string };
@@ -39,7 +39,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     className: "canvas-editable",
     title: "Click and type to edit",
   } : {};
-  return <div className={`poster poster-${style} ${editable ? "poster-edit-mode" : ""}`} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? `linear-gradient(#00000022,#00000022), url("${design.backgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
+  return <div className={`poster poster-${style} poster-layout-${item.layout} ${editable ? "poster-edit-mode" : ""}`} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? `linear-gradient(#00000022,#00000022), url("${design.backgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
     <div className="poster-top"><span>RS / STUDIO</span><span {...editProps("date")}>{design?.date ?? item.date}</span></div>
     <div className="poster-title" style={{ whiteSpace: "pre-line" }} {...editProps("headline")}>{headline}</div>
     {design?.customText && <div className="poster-custom-text" {...editProps("customText")}>{design.customText}</div>}
