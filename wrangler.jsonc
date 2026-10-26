@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "runstats-studio",
+  "name": "setupkaro",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-26",
   "assets": {
@@ -8,12 +8,5 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
-  "observability": { "enabled": true },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "runstats-studio-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
-    }
-  ]
+  "observability": { "enabled": true }
 }
