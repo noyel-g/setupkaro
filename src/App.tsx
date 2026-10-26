@@ -82,7 +82,7 @@ export default function App() {
     }
   }
 
-  async function reportNote() {
+  async function shareSite() {\n    try {\n      await navigator.clipboard.writeText(window.location.origin);\n      setError("Link copied. Pass dayletter along to someone who might need a kind word.");\n    } catch {\n      setError("Pass along this page: " + window.location.origin);\n    }\n  }\n\n  async function reportNote() {
     if (!received?.id) return;
     setReporting(true);
     try {
@@ -106,7 +106,7 @@ export default function App() {
   return <div className="site-shell">
     <header className="site-header">
       <a className="wordmark" href="/" aria-label="Dayletter home"><span className="wordmark-icon"><Feather size={17} strokeWidth={1.8}/></span><span>dayletter<span className="wordmark-period">.</span></span></a>
-      <div className="header-note"><span className="live-dot"/><span>A small connection between strangers</span></div>
+      <div className="header-note"><span className="live-dot"/><span>{noteCount !== null && noteCount > 0 ? `${noteCount} notes waiting to be found` : "A small connection between strangers"}</span></div>
       <a href="#how-it-works" className="header-how">HOW IT WORKS <ArrowDownRight size={13}/></a>
     </header>
 
@@ -152,7 +152,7 @@ export default function App() {
         </article>
         <div className="result-actions"><div className="result-thanks"><Sparkles size={15}/><span>Your note has joined the pile for someone else to find.</span></div><button className="report-button" onClick={() => setReportOpen(true)} disabled={reported}><Flag size={13}/>{reported ? "Reported" : "Report note"}</button></div>
         <div className="closing-line"><span className="closing-dash"/> Let the note be enough. <span className="closing-dash"/></div>
-        <button className="share-link" onClick={() => {navigator.clipboard?.writeText(window.location.origin).then(() => setError("")).catch(() => {}); setError("Pass dayletter along to someone who might need a kind word.");}}><Heart size={14}/> Pass the kindness on <ArrowRight size={13}/></button>
+        <button className="share-link" onClick={shareSite}><Heart size={14}/> Pass the kindness on <ArrowRight size={13}/></button>
         {error && <p className="share-feedback" aria-live="polite">{error}</p>}
       </section>}
 
