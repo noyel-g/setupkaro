@@ -10,7 +10,7 @@ const json = (data: unknown, status = 200) => new Response(JSON.stringify(data),
   headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
 });
 const id = () => crypto.randomUUID();
-const uuidPattern = /^[0-9a-f-]{36}$/i;
+const noteIdPattern = /^(?:[0-9a-f-]{36}|seed-[0-9a-f]{32})$/i;
 
 function contentError(body: string): string | null {
   const value = body.trim();
@@ -75,7 +75,7 @@ async function report(request: Request, env: Env) {
   const noteId = typeof payload.noteId === "string" ? payload.noteId : "";
   const allowed = new Set(["inappropriate", "personal", "harassment", "spam"]);
   const reason = typeof payload.reason === "string" && allowed.has(payload.reason) ? payload.reason : "spam";
-  if (!uuidPattern.test(noteId)) return json({ error: "That note could not be found." }, 400);
+  if (!noteIdPattern.test(noteId)) return json({ error: "That note could not be found." }, 400);
   const result = await env.DB.prepare("SELECT id FROM notes WHERE id = ? AND status = 'delivered'").bind(noteId).first<{ id: string }>();
   if (!result) return json({ error: "This note is no longer available to report." }, 404);
   await env.DB.batch([
