@@ -129,7 +129,7 @@ async function downloadPoster(item: Template, design: Design) {
   ctx.textAlign = "right";
   ctx.fillText(design.date.slice(0, 24), 1008, 80);
   ctx.textAlign = "left";
-  const lines = design.headline.split("\\n").slice(0, 3);
+  const lines = design.headline.split("\n").slice(0, 3);
   ctx.font = "bold 106px Arial, sans-serif";
   lines.forEach((line, i) => {
     ctx.fillStyle = line.endsWith(".") ? palette.accent : palette.ink;
