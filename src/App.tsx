@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleHelp, Download, Flame, Footprints, MapPin, Plus, Route, Sparkles, Waves, X, Pencil, RotateCcw } from "lucide-react";
 
 const templates = [
@@ -8,6 +8,7 @@ const templates = [
 ];
 type Template = typeof templates[number];
 type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string };
+type Athlete = { id: number; firstname: string | null; lastname: string | null; profile: string | null };
 
 const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
   cream: { bg: "#f9f5e9", ink: "#262720", accent: "#ed633b" },
@@ -89,7 +90,29 @@ export default function App() {
   const [selected, setSelected] = useState<Template | null>(null);
   const [design, setDesign] = useState<Design | null>(null);
   const [notice, setNotice] = useState("");
+  const [athlete, setAthlete] = useState<Athlete | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const visibleTemplates = useMemo(() => filter === "ALL" ? templates : templates.filter((item) => item.kind === filter), [filter]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/auth/me", { credentials: "same-origin" })
+      .then((response) => response.ok ? response.json() : { connected: false })
+      .then((data: { connected?: boolean; athlete?: Athlete }) => { if (active && data.connected && data.athlete) setAthlete(data.athlete); })
+      .catch(() => undefined)
+      .finally(() => { if (active) setAuthChecked(true); });
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("strava") === "connected") setNotice("Strava connected successfully. Your activity import is ready for the next step.");
+    if (params.get("strava") === "cancelled") setNotice("Strava connection was cancelled.");
+    if (params.has("strava")) { params.delete("strava"); const query = params.toString(); window.history.replaceState({}, "", window.location.pathname + (query ? "?" + query : "") + window.location.hash); }
+    return () => { active = false; };
+  }, []);
+
+  const connectStrava = () => { window.location.assign("/api/auth/strava/start"); };
+  const disconnectStrava = async () => {
+    try { await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }); }
+    finally { setAthlete(null); setNotice("Strava disconnected from this workspace."); }
+  };
 
   const openEditor = (item: Template) => {
     setSelected(item);
@@ -106,7 +129,7 @@ export default function App() {
       <a className="nav-item active" href="#templates"><Sparkles size={17}/> Discover templates</a>
       <a className="nav-item" href="#editor" onClick={(event) => { event.preventDefault(); if (selected) setNotice("You're already in the poster editor."); else setNotice("Choose a template to open the poster editor."); }}><Pencil size={17}/> Poster editor <span className="nav-soon">BETA</span></a>
       <a className="nav-item" href="#activities" onClick={(event) => { event.preventDefault(); setNotice("Activity import will be available after Strava connection is built."); }}><Route size={17}/> My activities <span className="nav-soon">SOON</span></a>
-      <div className="side-bottom"><div className="connect-card"><div className="connect-icon"><Waves size={18}/></div><strong>Your runs, your story.</strong><p>Connect Strava to turn your real activities into something worth keeping.</p><button className="connect-button" onClick={() => setNotice("Strava connection is planned for a later step.")}>Connect Strava <ArrowUpRight size={15}/></button><small>COMING IN A LATER STEP</small></div><a className="nav-item muted" href="#help" onClick={(event) => { event.preventDefault(); setNotice("Help and feedback will be added as the app grows."); }}><CircleHelp size={17}/> Help & feedback</a><div className="profile"><div className="avatar">R</div><div><strong>Runner</strong><small>Free workspace</small></div><ChevronDown size={16}/></div></div>
+      <div className="side-bottom"><div className="connect-card"><div className="connect-icon"><Waves size={18}/></div><strong>{athlete ? `Connected: ${athlete.firstname ?? "Strava"} ${athlete.lastname ?? ""}`.trim() : "Your runs, your story."}</strong><p>{athlete ? "Your Strava account is connected. Activity browsing is the next interface step." : "Connect Strava to turn your real activities into something worth keeping."}</p>{athlete ? <button className="connect-button connected-button" onClick={disconnectStrava}>Disconnect Strava <X size={14}/></button> : <button className="connect-button" onClick={connectStrava}>Connect Strava <ArrowUpRight size={15}/></button>}<small>{athlete ? "ACCOUNT CONNECTED" : authChecked ? "SECURE STRAVA OAUTH" : "CHECKING CONNECTION…"}</small></div><a className="nav-item muted" href="#help" onClick={(event) => { event.preventDefault(); setNotice("Help and feedback will be added as the app grows."); }}><CircleHelp size={17}/> Help & feedback</a><div className="profile"><div className="avatar">R</div><div><strong>{athlete ? `${athlete.firstname ?? "Strava"} ${athlete.lastname ?? ""}`.trim() : "Runner"}</strong><small>{athlete ? "Strava connected" : "Free workspace"}</small></div><ChevronDown size={16}/></div></div>
     </aside>
     <section className="main-content">
       <header className="topbar"><div className="breadcrumbs">Workspace <span>/</span> <b>Discover</b></div><div className="top-actions"><span className="status-dot"/> <span className="saved-label">Template gallery ready</span><button className="help-button" aria-label="Help" onClick={() => setNotice("Choose a template to edit it. Changes appear in the live preview.")}><CircleHelp size={17}/></button></div></header>
