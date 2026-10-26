@@ -1,58 +1,32 @@
-# RunStats Studio
+# Daymark
 
-A Strava-powered running poster generator. The current frontend includes a template gallery and a client-side poster editor/PNG export. The Worker now has the first Strava OAuth and activity API routes; those routes remain unavailable until the D1 database binding and Strava secrets are configured.
+A quiet, local-first daily journal for capturing everyday moments. Notes are grouped by date and type, with a simple task list, searchable timeline, tags, and Markdown-friendly writing.
 
-## Requirements
+## Features
 
-- Node.js 20 or newer
-- npm
-- Cloudflare account for deployment
-- Strava API application for OAuth
+- **Today page** — keep a day-by-day record of small moments, thoughts, reading notes, exercise, ideas, work, and more.
+- **Timeline** — browse past entries by date or search across titles, body text, types, and tags.
+- **Type-based organization** — entries are grouped by what they are, while tags add another layer of context.
+- **Tasks** — keep a lightweight list next to the journal, with due dates and completed tasks.
+- **Markdown-friendly notes** — use plain text, simple lists, and bold markers; export individual entries as Markdown.
+- **Local-first privacy** — no account, tracking, analytics, or application server needed for journal entries. Content is stored in this browser's local storage.
+- **Backup and restore** — export a Markdown archive and JSON backup, and import a Daymark JSON backup or Markdown text.
+- **Responsive layout** — desktop sidebar and mobile navigation.
 
-## Local development
+## Development
+
+Requires Node.js 20+ and npm.
 
 ```sh
 npm install
 npm run dev
-```
-
-## Build
-
-```sh
 npm run build
 ```
 
-## Cloudflare and Strava setup
+## Storage note
 
-Do not commit secrets, access tokens, refresh tokens, or `.dev.vars`.
+Your journal is saved in the browser on this device. Clearing browser data can remove it. Use **Settings & backup → Export backup** periodically to download your Markdown and JSON copies. This app does not sync notes to a server and does not write directly to an Obsidian vault or filesystem.
 
-1. In the Cloudflare dashboard, create a D1 database named `runstats-studio-db`.
-2. Copy its database ID. Add the D1 binding in `wrangler.jsonc` with binding name `DB`, database name `runstats-studio-db`, and that real database ID. Do not use a placeholder ID.
-3. Apply migrations to the remote database after the binding is configured:
-   `npx wrangler d1 migrations apply runstats-studio-db --remote`
-4. Create a Strava API application at the Strava developer settings. Set its Authorization Callback Domain to the deployed Worker hostname (hostname only, no protocol or path).
-5. Set these as Cloudflare Worker secrets/variables (never in frontend code):
-   - `STRAVA_CLIENT_ID` — the client ID from your Strava API application
-   - `STRAVA_CLIENT_SECRET` — the client secret, stored as a secret
-   - `STRAVA_REDIRECT_URI` — the full callback URL, for example `https://YOUR-WORKER-HOSTNAME/api/auth/strava/callback`; use your actual deployed hostname
-6. In the Strava app, ensure the callback URL's domain matches the Authorization Callback Domain.
-7. Deploy the latest `main` branch and check `/api/health`. It should report `databaseConfigured: true` and `stravaConfigured: true`.
+## Project status
 
-OAuth requests ask for `read,activity:read_all`. Access and refresh tokens are stored server-side in D1, not sent to the frontend. The browser receives an HttpOnly session cookie. The application has not yet been tested end-to-end against a real Strava account.
-
-## Project structure
-
-- `src/`: React frontend, UI, template previews, editor and PNG export
-- `worker/index.ts`: Cloudflare Worker, OAuth callback, session and activity endpoints
-- `migrations/`: D1 SQL migrations
-- `wrangler.jsonc`: Cloudflare Worker and static asset configuration
-
-## Development stages
-
-1. Foundation and deployment
-2. Interactive template gallery
-3. Poster editor and PNG export
-4. Strava OAuth and activity API (routes implemented; configuration/testing pending)
-5. GPS route rendering
-6. Admin template builder
-7. Persisted designs, final deployment and end-to-end testing
+The previous RunStats Studio application is preserved on branch `backup/runstats-studio-2026-10-26`. The `main` branch now contains Daymark.
