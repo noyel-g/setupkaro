@@ -51,7 +51,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     quiet: {src:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=85",alt:"Quiet outdoor landscape"},
     track: {src:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&q=85",alt:"Runner training"},
     "route-map": {src:"https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=900&q=85",alt:"Forest trail"},
-    "minimal-stats": {src:"https://images.unsplash.com/photo-1461896836934- incoming?auto=format&fit=crop&w=900&q=85",alt:"Athlete running"},
+    "minimal-stats": {src:"https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=85",alt:"Athlete running"},
     magazine: {src:"https://images.unsplash.com/photo-1502904550040-7534597429ae?auto=format&fit=crop&w=900&q=85",alt:"Mountain landscape"},
     split: {src:"https://images.unsplash.com/photo-1533561052604-c3beb6d55b8d?auto=format&fit=crop&w=900&q=85",alt:"Runner outdoors"},
   };
@@ -73,7 +73,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     split: <><div className="poster-split-copy">{top}{title}<div className="poster-split-vertical">RUN YOUR OWN RACE — SINCE ALWAYS</div>{custom}{footer}</div><div className="poster-split-data"><span>YOUR SESSION</span>{stats}<div className="poster-split-mark">RS<span>®</span></div></div></>,
   };
   return <div className={"poster poster-" + style + " poster-layout-" + item.layout + (editable ? " poster-edit-mode" : "")} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? 'linear-gradient(#00000022,#00000022), url("' + design.backgroundImage + '")' : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
-    {layouts[item.layout] ?? <>{top}{title}{custom}{route}{stats}{footer}</>}
+    {photoLayer}{layouts[item.layout] ?? <>{top}{title}{custom}{route}{stats}{footer}</>}
   </div>;
 }
 async function downloadPoster(item: Template, design: Design) {
