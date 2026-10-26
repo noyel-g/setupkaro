@@ -3,21 +3,34 @@ import type React from "react";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleHelp, Download, Flame, Footprints, MapPin, Plus, Route, Sparkles, Waves, X, Pencil, RotateCcw } from "lucide-react";
 
 const templates = [
-  { id: "01", layout: "editorial", name: "The Sunday Long Run", kind: "EDITORIAL", style: "cream", distance: "21.10", time: "2:04:38", pace: "5:54", date: "SUNDAY, OCT 18", headline: "A LITTLE\nFARTHER." },
-  { id: "02", layout: "night-grid", name: "After Hours", kind: "DARK MODE", style: "dark", distance: "10.02", time: "48:12", pace: "4:48", date: "THURSDAY, OCT 22", headline: "NIGHT\nMILES." },
-  { id: "03", layout: "type-poster", name: "Just Keep Going", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "26:40", pace: "5:20", date: "TUESDAY, OCT 20", headline: "SHOW UP.\nRUN ON." },
-  { id: "04", layout: "sunrise", name: "First Light", kind: "MINIMAL", style: "cream", distance: "8.24", time: "42:18", pace: "5:08", date: "MONDAY, OCT 19", headline: "MEET ME\nAT DAWN." },
-  { id: "05", layout: "photo-frame", name: "Midnight Club", kind: "DARK MODE", style: "dark", distance: "12.00", time: "1:02:44", pace: "5:14", date: "FRIDAY, OCT 16", headline: "CITY\nSLEEPING." },
-  { id: "06", layout: "personal-best", name: "Personal Best", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "24:58", pace: "4:59", date: "SATURDAY, OCT 17", headline: "NEW\nPERSONAL BEST." },
-  { id: "07", layout: "quiet", name: "Quiet Miles", kind: "MINIMAL", style: "cream", distance: "6.50", time: "35:20", pace: "5:26", date: "WEDNESDAY, OCT 21", headline: "JUST ME\nAND THE ROAD." },
-  { id: "08", layout: "track", name: "Track Session", kind: "BOLD TYPE", style: "orange", distance: "7.20", time: "34:12", pace: "4:45", date: "TUESDAY, OCT 13", headline: "ONE MORE\nREPEAT." },
-  { id: "09", layout: "route-map", name: "The Long Way Home", kind: "EDITORIAL", style: "cream", distance: "18.60", time: "1:48:30", pace: "5:50", date: "SUNDAY, OCT 11", headline: "TAKE THE\nLONG WAY." },
-  { id: "10", layout: "minimal-stats", name: "No Days Wasted", kind: "DARK MODE", style: "dark", distance: "4.80", time: "25:40", pace: "5:21", date: "THURSDAY, OCT 15", headline: "SMALL STEPS.\nBIG DAYS." },
-  { id: "11", layout: "magazine", name: "Weekend Ritual", kind: "EDITORIAL", style: "cream", distance: "10.00", time: "51:06", pace: "5:06", date: "SATURDAY, OCT 10", headline: "SAME TIME.\nSAME JOY." },
-  { id: "12", layout: "split", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.\nYOUR PLACE." },
+  { id: "01", layout: "editorial", name: "The Sunday Long Run", kind: "EDITORIAL", style: "cream", distance: "21.10", time: "2:04:38", pace: "5:54", date: "SUNDAY, OCT 18", headline: "A LITTLE
+FARTHER." },
+  { id: "02", layout: "night-grid", name: "After Hours", kind: "DARK MODE", style: "dark", distance: "10.02", time: "48:12", pace: "4:48", date: "THURSDAY, OCT 22", headline: "NIGHT
+MILES." },
+  { id: "03", layout: "type-poster", name: "Just Keep Going", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "26:40", pace: "5:20", date: "TUESDAY, OCT 20", headline: "SHOW UP.
+RUN ON." },
+  { id: "04", layout: "sunrise", name: "First Light", kind: "MINIMAL", style: "cream", distance: "8.24", time: "42:18", pace: "5:08", date: "MONDAY, OCT 19", headline: "MEET ME
+AT DAWN." },
+  { id: "05", layout: "photo-frame", name: "Midnight Club", kind: "DARK MODE", style: "dark", distance: "12.00", time: "1:02:44", pace: "5:14", date: "FRIDAY, OCT 16", headline: "CITY
+SLEEPING." },
+  { id: "06", layout: "personal-best", name: "Personal Best", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "24:58", pace: "4:59", date: "SATURDAY, OCT 17", headline: "NEW
+PERSONAL BEST." },
+  { id: "07", layout: "quiet", name: "Quiet Miles", kind: "MINIMAL", style: "cream", distance: "6.50", time: "35:20", pace: "5:26", date: "WEDNESDAY, OCT 21", headline: "JUST ME
+AND THE ROAD." },
+  { id: "08", layout: "track", name: "Track Session", kind: "BOLD TYPE", style: "orange", distance: "7.20", time: "34:12", pace: "4:45", date: "TUESDAY, OCT 13", headline: "ONE MORE
+REPEAT." },
+  { id: "09", layout: "route-map", name: "The Long Way Home", kind: "EDITORIAL", style: "cream", distance: "18.60", time: "1:48:30", pace: "5:50", date: "SUNDAY, OCT 11", headline: "TAKE THE
+LONG WAY." },
+  { id: "10", layout: "minimal-stats", name: "No Days Wasted", kind: "DARK MODE", style: "dark", distance: "4.80", time: "25:40", pace: "5:21", date: "THURSDAY, OCT 15", headline: "SMALL STEPS.
+BIG DAYS." },
+  { id: "11", layout: "magazine", name: "Weekend Ritual", kind: "EDITORIAL", style: "cream", distance: "10.00", time: "51:06", pace: "5:06", date: "SATURDAY, OCT 10", headline: "SAME TIME.
+SAME JOY." },
+  { id: "12", layout: "split", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.
+YOUR PLACE." },
 ];
 type Template = typeof templates[number];
-type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string; customText: string; routePolyline?: string };\ntype RunActivity = { id: number; name: string; type: string; sport_type?: string; start_date: string; distance: number; moving_time: number; total_elevation_gain?: number; average_heartrate?: number; map?: { summary_polyline?: string | null } };
+type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string; customText: string; routePolyline?: string };
+type RunActivity = { id: number; name: string; type: string; sport_type?: string; start_date: string; distance: number; moving_time: number; total_elevation_gain?: number; average_heartrate?: number; map?: { summary_polyline?: string | null } };
 type Athlete = { id: number; firstname: string | null; lastname: string | null; profile: string | null };
 
 const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
@@ -128,7 +141,8 @@ async function downloadPoster(item: Template, design: Design) {
   ctx.textAlign = "right";
   ctx.fillText(design.date.slice(0, 24), 1008, 80);
   ctx.textAlign = "left";
-  const lines = design.headline.split("\n").slice(0, 3);
+  const lines = design.headline.split("
+").slice(0, 3);
   ctx.font = "bold 106px Arial, sans-serif";
   lines.forEach((line, i) => {
     ctx.fillStyle = line.endsWith(".") ? palette.accent : palette.ink;
@@ -180,7 +194,9 @@ export default function App() {
   const [design, setDesign] = useState<Design | null>(null);
   const backgroundInputRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState("");
-  const [athlete, setAthlete] = useState<Athlete | null>(null);\n  const [activities, setActivities] = useState<RunActivity[]>([]);\n  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [athlete, setAthlete] = useState<Athlete | null>(null);
+  const [activities, setActivities] = useState<RunActivity[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const visibleTemplates = useMemo(() => filter === "ALL" ? templates : templates.filter((item) => item.kind === filter), [filter]);
 
@@ -209,7 +225,31 @@ export default function App() {
     setDesign({ headline: item.headline, distance: item.distance, time: item.time, pace: item.pace, date: item.date, footer: "ONE RUN AT A TIME.", style: item.style, backgroundImage: "", customText: "", routePolyline: "" });
     setNotice("");
   };
-  const closeEditor = () => { setSelected(null); setDesign(null); };\n  const loadActivities = async () => {\n    setLoadingActivities(true);\n    try {\n      const response = await fetch("/api/activities?per_page=30", { credentials: "same-origin" });\n      const data = await response.json() as { activities?: RunActivity[]; error?: string };\n      if (!response.ok) throw new Error(data.error || "Could not fetch activities.");\n      setActivities((data.activities || []).filter((a) => ["Run", "TrailRun", "VirtualRun", "Walk", "Hike"].includes(a.sport_type || a.type)));\n      setNotice("Loaded recent Strava activities. Choose a run to create a poster.");\n    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not load activities."); }\n    finally { setLoadingActivities(false); }\n  };\n  const createFromActivity = async (a: RunActivity) => {\n    try {\n      const response = await fetch("/api/activities/" + a.id, { credentials: "same-origin" });\n      const data = await response.json() as { activity?: RunActivity & { summary_polyline?: string | null }; error?: string };\n      if (!response.ok || !data.activity) throw new Error(data.error || "Could not load activity route.");\n      const run = data.activity;\n      const item = templates.find((t) => t.layout === "route-map") || templates[0];\n      const seconds = run.moving_time || 0;\n      setSelected(item);\n      setDesign({ headline: (run.name || "YOUR RUN").toUpperCase().slice(0, 40), distance: (run.distance / 1000).toFixed(2), time: Math.floor(seconds / 3600) + ":" + String(Math.floor(seconds % 3600 / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0"), pace: run.distance > 0 ? ((seconds / 60) / (run.distance / 1000)).toFixed(2) : "--", date: new Date(run.start_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase(), footer: Math.round(run.total_elevation_gain || 0) + " M ELEVATION GAIN", style: "cream", backgroundImage: "", customText: run.average_heartrate ? "AVG HEART RATE " + Math.round(run.average_heartrate) + " BPM" : "", routePolyline: run.summary_polyline || "" });\n      setNotice("Poster populated with real activity stats and route data.");\n    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create poster."); }\n  };
+  const closeEditor = () => { setSelected(null); setDesign(null); };
+  const loadActivities = async () => {
+    setLoadingActivities(true);
+    try {
+      const response = await fetch("/api/activities?per_page=30", { credentials: "same-origin" });
+      const data = await response.json() as { activities?: RunActivity[]; error?: string };
+      if (!response.ok) throw new Error(data.error || "Could not fetch activities.");
+      setActivities((data.activities || []).filter((a) => ["Run", "TrailRun", "VirtualRun", "Walk", "Hike"].includes(a.sport_type || a.type)));
+      setNotice("Loaded recent Strava activities. Choose a run to create a poster.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not load activities."); }
+    finally { setLoadingActivities(false); }
+  };
+  const createFromActivity = async (a: RunActivity) => {
+    try {
+      const response = await fetch("/api/activities/" + a.id, { credentials: "same-origin" });
+      const data = await response.json() as { activity?: RunActivity & { summary_polyline?: string | null }; error?: string };
+      if (!response.ok || !data.activity) throw new Error(data.error || "Could not load activity route.");
+      const run = data.activity;
+      const item = templates.find((t) => t.layout === "route-map") || templates[0];
+      const seconds = run.moving_time || 0;
+      setSelected(item);
+      setDesign({ headline: (run.name || "YOUR RUN").toUpperCase().slice(0, 40), distance: (run.distance / 1000).toFixed(2), time: Math.floor(seconds / 3600) + ":" + String(Math.floor(seconds % 3600 / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0"), pace: run.distance > 0 ? ((seconds / 60) / (run.distance / 1000)).toFixed(2) : "--", date: new Date(run.start_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase(), footer: Math.round(run.total_elevation_gain || 0) + " M ELEVATION GAIN", style: "cream", backgroundImage: "", customText: run.average_heartrate ? "AVG HEART RATE " + Math.round(run.average_heartrate) + " BPM" : "", routePolyline: run.summary_polyline || "" });
+      setNotice("Poster populated with real activity stats and route data.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Could not create poster."); }
+  };
   const updateDesign = (key: keyof Design, value: string) => setDesign((current) => current ? { ...current, [key]: value } : current);
 
   return <main className="app-shell">
