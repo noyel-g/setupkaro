@@ -25,50 +25,6 @@ const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
   orange: { bg: "#ee653d", ink: "#2a2a24", accent: "#f9f5e9" },
 };
 
-function parseActivityFile(xmlText: string, fileName: string) {
-  const xml = new DOMParser().parseFromString(xmlText, "application/xml");
-  if (xml.querySelector("parsererror")) throw new Error("This route file is not valid GPX or TCX XML.");
-  const local = (node: Element, name: string) => Array.from(node.getElementsByTagName("*")).find((el) => el.localName.toLowerCase() === name.toLowerCase())?.textContent?.trim() ?? "";
-  const rows: Array<{ lat:number; lon:number; ele:number|null; time:number|null }> = [];
-  const gpx = Array.from(xml.getElementsByTagName("*")).filter((el) => ["trkpt","rtept"].includes(el.localName.toLowerCase()));
-  if (gpx.length) {
-    for (const node of gpx) {
-      const lat=Number(node.getAttribute("lat")),lon=Number(node.getAttribute("lon"));
-      if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;
-      const e=local(node,"ele"),t=local(node,"time");
-      rows.push({lat,lon,ele:e?Number(e):null,time:t?Date.parse(t):null});
-    }
-  } else {
-    const tcx=Array.from(xml.getElementsByTagName("*")).filter((el)=>el.localName.toLowerCase()==="trackpoint");
-    for(const node of tcx){
-      const lt=local(node,"LatitudeDegrees"),ln=local(node,"LongitudeDegrees");
-      if(!lt||!ln)continue;
-      const e=local(node,"AltitudeMeters"),t=local(node,"Time");
-      rows.push({lat:Number(lt),lon:Number(ln),ele:e?Number(e):null,time:t?Date.parse(t):null});
-    }
-  }
-  if(rows.length<2)throw new Error("No GPS points found. Export this activity as GPX or TCX and try again.");
-  const rad=(v:number)=>v*Math.PI/180;
-  let metres=0,gain=0;
-  for(let i=1;i<rows.length;i++){
-    const p=rows[i-1],q=rows[i],dLat=rad(q.lat-p.lat),dLon=rad(q.lon-p.lon);
-    const h=Math.sin(dLat/2)**2+Math.cos(rad(p.lat))*Math.cos(rad(q.lat))*Math.sin(dLon/2)**2;
-    metres+=6371000*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
-    if(p.ele!==null&&q.ele!==null&&q.ele>p.ele)gain+=q.ele-p.ele;
-  }
-  const times=rows.map(p=>p.time).filter((t):t is number=>t!==null&&Number.isFinite(t));
-  const seconds=times.length>1?Math.max(0,Math.round((Math.max(...times)-Math.min(...times))/1000)):0;
-  const km=metres/1000, stride=Math.max(1,Math.ceil(rows.length/450));
-  const sampled=rows.filter((_,i)=>i===0||i===rows.length-1||i%stride===0);
-  let encoded="",lastLat=0,lastLon=0;
-  const emit=(n:number)=>{let v=n<0?~(n<<1):(n<<1);while(v>=0x20){encoded+=String.fromCharCode((0x20|(v&0x1f))+63);v>>=5;}encoded+=String.fromCharCode(v+63);};
-  sampled.forEach(p=>{const lat=Math.round(p.lat*1e5),lon=Math.round(p.lon*1e5);emit(lat-lastLat);emit(lon-lastLon);lastLat=lat;lastLon=lon;});
-  const date=times.length?new Date(Math.min(...times)):null;
-  const duration=Math.floor(seconds/3600)+":"+String(Math.floor(seconds%3600/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
-  const base=fileName.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").trim().toUpperCase();
-  return {headline:(base||"YOUR RUN").slice(0,40),distance:km.toFixed(2),time:duration,pace:seconds>0&&km>0?Math.floor(seconds/km/60)+":"+String(Math.round(seconds/km%60)).padStart(2,"0"):"--",date:date?date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase():"ACTIVITY IMPORT",footer:Math.round(gain)+" M ELEVATION GAIN",routePolyline:encoded,pointCount:rows.length};
-}
-
 function decodeRoute(encoded: string) {
   const points: Array<[number, number]> = [];
   let index = 0, lat = 0, lng = 0;
@@ -141,7 +97,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     magazine: <><div className="poster-magazine-masthead">PACE <span>THE RUN JOURNAL</span><b>№ 026</b></div>{title}<div className="poster-magazine-photo"><div className="poster-magazine-sun"/><div className="poster-magazine-hill"/><div className="poster-magazine-runner">↗</div><span>THE WEEKEND ISSUE</span></div>{custom}{stats}{footer}</>,
     split: <><div className="poster-split-copy">{top}{title}<div className="poster-split-vertical">RUN YOUR OWN RACE — SINCE ALWAYS</div>{custom}{footer}</div><div className="poster-split-data"><span>YOUR SESSION</span>{stats}<div className="poster-split-mark">RS<span>®</span></div></div></>,
   };
-  return <div className={"poster poster-" + style + " poster-layout-" + item.layout + (editable ? " poster-edit-mode" : "")} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? 'linear-gradient(#00000022,#00000022), url("' + design.backgroundImage + '")' : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
+  return <div className={"poster poster-" + style + " poster-layout-" + item.layout + (editable ? " poster-edit-mode" : "") + (design?.activityOverlay ? " has-activity-overlay" : "")} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? 'linear-gradient(#00000022,#00000022), url("' + design.backgroundImage + '")' : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
     {photoLayer}{design?.activityOverlay && <img className="poster-activity-overlay" src={design.activityOverlay} alt="Uploaded transparent activity graphic" />}{layouts[item.layout] ?? <>{top}{title}{custom}{route}{stats}{footer}</>}
   </div>;
 }
@@ -213,7 +169,7 @@ async function downloadPoster(item: Template, design: Design) {
       });
       ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke();
     }
-  } else {
+  } else if (!design.activityOverlay) {
     ctx.setLineDash([10, 14]);
     ctx.beginPath();
     ctx.moveTo(80, 770);
@@ -254,10 +210,8 @@ export default function App() {
   const [design, setDesign] = useState<Design | null>(null);
   const backgroundInputRef = useRef<HTMLInputElement>(null);
   const activityImageInputRef = useRef<HTMLInputElement>(null);
-  const activityRouteInputRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState("");
   const [uploadedOverlay, setUploadedOverlay] = useState("");
-  const [routeImporting, setRouteImporting] = useState(false);
   const visibleTemplates = useMemo(() => filter === "ALL" ? templates : templates.filter((item) => item.kind === filter), [filter]);
 
   const openEditor = (item: Template) => {
@@ -280,20 +234,6 @@ export default function App() {
     reader.onerror=()=>setNotice("Could not read that image. Try another file.");
     reader.readAsDataURL(file);
   };
-  const handleRouteFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file=event.target.files?.[0];if(!file)return;
-    if(!/\.(gpx|tcx)$/i.test(file.name)){setNotice("Upload a .gpx or .tcx export for the actual GPS route.");event.target.value="";return;}
-    if(file.size>15*1024*1024){setNotice("Choose a route file smaller than 15 MB.");event.target.value="";return;}
-    setRouteImporting(true);
-    try {
-      const parsed=parseActivityFile(await file.text(),file.name);
-      const item=templates.find((t)=>t.layout==="route-map")??templates[0];
-      setSelected(item);
-      setDesign({headline:parsed.headline,distance:parsed.distance,time:parsed.time,pace:parsed.pace,date:parsed.date,footer:parsed.footer,style:"cream",backgroundImage:"",customText:"",routePolyline:parsed.routePolyline,activityOverlay:uploadedOverlay});
-      setNotice("Imported "+parsed.pointCount+" GPS points. Distance, pace, duration and elevation were calculated from the route file.");
-    } catch(error) { setNotice(error instanceof Error?error.message:"Could not import the activity file."); }
-    finally {setRouteImporting(false);event.target.value="";}
-  };
   const updateDesign = (key: keyof Design, value: string) => setDesign((current) => current ? { ...current, [key]: value } : current);
 
   return <main className="app-shell">
@@ -311,7 +251,7 @@ export default function App() {
         <div className="eyebrow"><span className="eyebrow-line"/> THE RUNNER'S CREATIVE STUDIO</div>
         <section className="hero"><div><h1>Your miles.<br/><em>Your masterpiece.</em></h1><p>Every run has a story. Give yours a place on the wall — with thoughtful, customisable posters made for runners.</p><a className="primary-button" href="#templates">Explore the templates <ArrowDownRight size={17}/></a></div><div className="hero-note"><div className="note-icon"><Flame size={20}/></div><div><strong>Made for the miles that matter.</strong><span>Long runs. First 5Ks. Ordinary Tuesdays.</span></div></div></section>
         <section className="stats-strip"><div><span className="strip-icon"><Activity size={17}/></span><strong>YOUR DATA</strong><small>Import your own activity</small></div><div><span className="strip-icon"><MapPin size={17}/></span><strong>YOUR ROUTE</strong><small>GPS route from GPX/TCX</small></div><div><span className="strip-icon"><Download size={17}/></span><strong>YOUR POSTER</strong><small>Export-ready designs</small></div></section>
-        <section className="activity-import" id="activities"><div className="eyebrow small"><span className="eyebrow-line"/> ACTIVITY IMPORT / NO ACCOUNT REQUIRED</div><h2>Bring your run into the studio<span>.</span></h2><p className="activity-import-copy">Use your transparent activity graphic as a visual layer. Add the GPX/TCX export to calculate your run stats and draw the real GPS route.</p><div className="activity-upload-grid"><div className="activity-upload-card"><div className="activity-upload-icon"><Download size={20}/></div><strong>1. Transparent activity image</strong><p>Upload the PNG overlay saved from your activity. Transparent PNG works best.</p><input ref={activityImageInputRef} id="activity-image-input" type="file" accept="image/png,image/webp" className="image-file-input" onChange={handleActivityImage}/><button className="secondary-button" onClick={()=>activityImageInputRef.current?.click()}><Plus size={15}/>{uploadedOverlay?"Replace activity image":"Upload transparent image"}</button>{uploadedOverlay&&<button className="text-button" onClick={()=>{setUploadedOverlay("");updateDesign("activityOverlay","");}}>Remove image</button>}</div><div className="activity-upload-card"><div className="activity-upload-icon"><Route size={20}/></div><strong>2. GPS route and statistics</strong><p>Upload a .gpx or .tcx export to calculate distance, duration, pace, elevation and route.</p><input ref={activityRouteInputRef} id="activity-route-input" type="file" accept=".gpx,.tcx,application/gpx+xml,application/vnd.garmin.tcx+xml" className="image-file-input" onChange={handleRouteFile}/><button className="primary-button" onClick={()=>activityRouteInputRef.current?.click()} disabled={routeImporting}><Plus size={15}/>{routeImporting?"Reading route…":"Upload GPX / TCX"}</button></div></div><div className="activity-import-note"><strong>Note:</strong> an image contains pixels, not raw GPS coordinates. The GPX/TCX file supplies the route and timestamps; the transparent image adds your saved activity graphic to the poster.</div></section><section className="template-section" id="templates"><div className="section-heading"><div><div className="eyebrow small"><span className="eyebrow-line"/> THE STARTING LINE</div><h2>Find your format<span>.</span></h2><p>Choose a design to customise your headline, stats, colors, and export a PNG.</p></div><div className="filter-wrap"><button className="filter-button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>{filter === "ALL" ? "All templates" : templates.find((item) => item.kind === filter)?.kind}<ChevronDown size={15}/></button>{filterOpen && <div className="filter-menu">{[["ALL", "All templates"], ["EDITORIAL", "Editorial"], ["DARK MODE", "Dark mode"], ["BOLD TYPE", "Bold type"], ["MINIMAL", "Minimal"]].map(([value, label]) => <button key={value} className={filter === value ? "filter-option selected" : "filter-option"} onClick={() => { setFilter(value); setFilterOpen(false); }}><span>{label}</span>{filter === value && <Check size={14}/>}</button>)}</div>}</div></div>
+        <section className="activity-import" id="activities"><div className="eyebrow small"><span className="eyebrow-line"/> ACTIVITY IMAGE / NO ACCOUNT REQUIRED</div><h2>Bring your run into the studio<span>.</span></h2><p className="activity-import-copy">Upload one transparent PNG or WebP that already includes your activity stats and route graphic. The whole graphic is placed on your poster—no separate route upload and no account connection.</p><div className="activity-upload-grid activity-upload-grid-single"><div className="activity-upload-card"><div className="activity-upload-icon"><Download size={20}/></div><strong>Upload your transparent activity image</strong><p>Choose the transparent activity image that includes the route and running stats. It will be layered over the selected poster design.</p><input ref={activityImageInputRef} id="activity-image-input" type="file" accept="image/png,image/webp" className="image-file-input" onChange={handleActivityImage}/><button className="primary-button" onClick={() => activityImageInputRef.current?.click()}><Plus size={15}/>{uploadedOverlay ? "Replace activity image" : "Upload transparent PNG / WebP"}</button>{uploadedOverlay && <button className="text-button" onClick={() => { setUploadedOverlay(""); setDesign((current) => current ? { ...current, activityOverlay: "" } : current); setNotice("Activity image removed."); }}>Remove image</button>}<small className="activity-file-hint">{uploadedOverlay ? "Image loaded into the editor. Open preview and export when ready." : "PNG/WebP · Maximum 10 MB · Transparency recommended"}</small></div></div><div className="activity-import-note"><strong>How this works:</strong> the route and stats are preserved visually from the image itself. An image does not contain the original GPS coordinates, so this single-upload mode does not recalculate GPS metrics; you can edit poster text and stats in the editor.</div></section><section className="template-section" id="templates"><div className="section-heading"><div><div className="eyebrow small"><span className="eyebrow-line"/> THE STARTING LINE</div><h2>Find your format<span>.</span></h2><p>Choose a design to customise your headline, stats, colors, and export a PNG.</p></div><div className="filter-wrap"><button className="filter-button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>{filter === "ALL" ? "All templates" : templates.find((item) => item.kind === filter)?.kind}<ChevronDown size={15}/></button>{filterOpen && <div className="filter-menu">{[["ALL", "All templates"], ["EDITORIAL", "Editorial"], ["DARK MODE", "Dark mode"], ["BOLD TYPE", "Bold type"], ["MINIMAL", "Minimal"]].map(([value, label]) => <button key={value} className={filter === value ? "filter-option selected" : "filter-option"} onClick={() => { setFilter(value); setFilterOpen(false); }}><span>{label}</span>{filter === value && <Check size={14}/>}</button>)}</div>}</div></div>
           <div className="template-grid">{visibleTemplates.map((item) => <article className="template-card" key={item.id}><button className="poster-pick" onClick={() => openEditor(item)} aria-label={`Edit ${item.name}`}><div className="poster-frame"><Poster item={item}/><span className="template-number">{item.id} / {String(templates.length).padStart(2, "0")}</span><span className="poster-hover-label">CUSTOMISE POSTER ↗</span></div></button><div className="template-info"><div><h3>{item.name}</h3><span className="template-kind">{item.kind}</span></div><button className="select-button" aria-label={`Edit ${item.name}`} title="Customize template" onClick={() => openEditor(item)}><Plus size={18}/></button></div></article>)}</div>
         </section>
         <section className="bottom-banner"><div className="banner-symbol"><Footprints size={23}/></div><div><strong>Good things take miles.</strong><p>Import an activity image or a GPX/TCX route file, then customise and export your poster.</p></div><span className="banner-tag">BUILT FOR RUNNERS, BY RUNNERS</span></section>
