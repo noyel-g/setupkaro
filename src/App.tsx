@@ -17,7 +17,7 @@ const templates = [
   { id: "12", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.\nYOUR PLACE." },
 ];
 type Template = typeof templates[number];
-type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string };
+type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string; customText: string };
 type Athlete = { id: number; firstname: string | null; lastname: string | null; profile: string | null };
 
 const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
@@ -42,6 +42,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
   return <div className={`poster poster-${style} ${editable ? "poster-edit-mode" : ""}`} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? `linear-gradient(#00000022,#00000022), url("${design.backgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
     <div className="poster-top"><span>RS / STUDIO</span><span {...editProps("date")}>{design?.date ?? item.date}</span></div>
     <div className="poster-title" style={{ whiteSpace: "pre-line" }} {...editProps("headline")}>{headline}</div>
+    {design?.customText && <div className="poster-custom-text" {...editProps("customText")}>{design.customText}</div>}
     <div className="route-art" aria-label="Decorative running route map"><svg viewBox="0 0 300 110" role="img"><path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/><circle cx="8" cy="78" r="4" fill="currentColor"/><circle cx="292" cy="29" r="4" fill="currentColor"/></svg></div>
     <div className="poster-stats"><div><strong {...editProps("distance")}>{design?.distance ?? item.distance}</strong><small>KILOMETRES</small></div><div><strong {...editProps("time")}>{design?.time ?? item.time}</strong><small>TIME</small></div><div><strong {...editProps("pace")}>{design?.pace ?? item.pace}</strong><small>MIN / KM</small></div></div>
     <div className="poster-bottom"><span {...editProps("footer")}>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>
@@ -84,6 +85,11 @@ async function downloadPoster(item: Template, design: Design) {
     ctx.fillStyle = line.endsWith(".") ? palette.accent : palette.ink;
     ctx.fillText(line.slice(0, 16), 72, 400 + i * 112, 930);
   });
+  if (design.customText.trim()) {
+    ctx.fillStyle = palette.ink;
+    ctx.font = "bold 34px Arial, sans-serif";
+    ctx.fillText(design.customText.slice(0, 45), 72, 650, 930);
+  }
   ctx.strokeStyle = palette.ink;
   ctx.lineWidth = 5;
   ctx.setLineDash([10, 14]);
@@ -151,7 +157,7 @@ export default function App() {
 
   const openEditor = (item: Template) => {
     setSelected(item);
-    setDesign({ headline: item.headline, distance: item.distance, time: item.time, pace: item.pace, date: item.date, footer: "ONE RUN AT A TIME.", style: item.style, backgroundImage: "" });
+    setDesign({ headline: item.headline, distance: item.distance, time: item.time, pace: item.pace, date: item.date, footer: "ONE RUN AT A TIME.", style: item.style, backgroundImage: "", customText: "" });
     setNotice("");
   };
   const closeEditor = () => { setSelected(null); setDesign(null); };
@@ -180,7 +186,9 @@ export default function App() {
       </div>
     </section>
     {notice && <div className="toast" role="status"><span>{notice}</span><button aria-label="Dismiss message" onClick={() => setNotice("")}><X size={15}/></button></div>}
-    {selected && design && <div className="modal-backdrop editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEditor(); }}><section className="template-modal editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title"><button className="modal-close" aria-label="Close editor" onClick={closeEditor}><X size={18}/></button><div className="editor-preview"><div className="eyebrow small"><span className="eyebrow-line"/> LIVE PREVIEW</div><div className="modal-poster canvas-poster"><Poster item={selected} design={design} editable onEdit={updateDesign}/></div><p className="preview-caption">Click any text on the poster to edit it directly · Sample stats only</p></div><div className="modal-details editor-controls"><div className="eyebrow small"><span className="eyebrow-line"/> POSTER WORKSPACE</div><h2 id="editor-title">Make it yours<span>.</span></h2><p className="editor-intro">Customise this design. Real Strava data will be connected in a later step.</p><label className="field-label" htmlFor="poster-headline">Headline <span>Use a new line for line breaks</span></label><textarea id="poster-headline" rows={2} maxLength={48} value={design.headline} onChange={(event) => updateDesign("headline", event.target.value)} /><div className="editor-fields"><label><span className="field-label">Distance (km)</span><input value={design.distance} maxLength={8} onChange={(event) => updateDesign("distance", event.target.value)} /></label><label><span className="field-label">Time</span><input value={design.time} maxLength={12} onChange={(event) => updateDesign("time", event.target.value)} /></label><label><span className="field-label">Pace (min/km)</span><input value={design.pace} maxLength={8} onChange={(event) => updateDesign("pace", event.target.value)} /></label></div><label className="field-label" htmlFor="poster-date">Date label</label><input id="poster-date" value={design.date} maxLength={28} onChange={(event) => updateDesign("date", event.target.value.toUpperCase())}/><label className="field-label" htmlFor="poster-footer">Footer message</label><input id="poster-footer" value={design.footer} maxLength={36} onChange={(event) => updateDesign("footer", event.target.value.toUpperCase())}/><div className="field-label">Background image</div>
+    {selected && design && <div className="modal-backdrop editor-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEditor(); }}><section className="template-modal editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title"><button className="modal-close" aria-label="Close editor" onClick={closeEditor}><X size={18}/></button><div className="editor-preview"><div className="eyebrow small"><span className="eyebrow-line"/> LIVE PREVIEW</div><div className="modal-poster canvas-poster"><Poster item={selected} design={design} editable onEdit={updateDesign}/></div><p className="preview-caption">Click any text on the poster to edit it directly · Sample stats only</p></div><div className="modal-details editor-controls"><div className="eyebrow small"><span className="eyebrow-line"/> POSTER WORKSPACE</div><h2 id="editor-title">Make it yours<span>.</span></h2><p className="editor-intro">Customise this design. Real Strava data will be connected in a later step.</p><label className="field-label" htmlFor="poster-headline">Headline <span>Use a new line for line breaks</span></label><textarea id="poster-headline" rows={2} maxLength={48} value={design.headline} onChange={(event) => updateDesign("headline", event.target.value)} /><div className="editor-fields"><label><span className="field-label">Distance (km)</span><input value={design.distance} maxLength={8} onChange={(event) => updateDesign("distance", event.target.value)} /></label><label><span className="field-label">Time</span><input value={design.time} maxLength={12} onChange={(event) => updateDesign("time", event.target.value)} /></label><label><span className="field-label">Pace (min/km)</span><input value={design.pace} maxLength={8} onChange={(event) => updateDesign("pace", event.target.value)} /></label></div><label className="field-label" htmlFor="poster-date">Date label</label><input id="poster-date" value={design.date} maxLength={28} onChange={(event) => updateDesign("date", event.target.value.toUpperCase())}/><label className="field-label" htmlFor="poster-footer">Footer message</label><input id="poster-footer" value={design.footer} maxLength={36} onChange={(event) => updateDesign("footer", event.target.value.toUpperCase())}/><div className="field-label">Extra text layer <span>Optional</span></div>
+          <input aria-label="Additional poster text" placeholder="Add a short line to your poster…" value={design.customText} maxLength={45} onChange={(event) => updateDesign("customText", event.target.value)} />
+          <div className="field-label">Background image</div>
           <div className="background-tools">
             <input ref={backgroundInputRef} className="image-file-input" type="file" accept="image/*" aria-label="Upload poster background image" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; if (file.size > 8 * 1024 * 1024) { setNotice("Choose an image smaller than 8 MB."); event.target.value = ""; return; } const reader = new FileReader(); reader.onload = () => updateDesign("backgroundImage", String(reader.result ?? "")); reader.readAsDataURL(file); }} />
             <button type="button" className="secondary-button" onClick={() => backgroundInputRef.current?.click()}><Plus size={14}/>{design.backgroundImage ? "Replace image" : "Upload image"}</button>
