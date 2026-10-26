@@ -26,6 +26,21 @@ const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
   orange: { bg: "#ee653d", ink: "#2a2a24", accent: "#f9f5e9" },
 };
 
+function decodeRoute(encoded: string) {
+  const points: Array<[number, number]> = [];
+  let index = 0, lat = 0, lng = 0;
+  while (index < encoded.length) {
+    let result = 0, shift = 0, byte = 0;
+    do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 31) << shift; shift += 5; } while (byte >= 32 && index < encoded.length);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+    result = 0; shift = 0;
+    do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 31) << shift; shift += 5; } while (byte >= 32 && index < encoded.length);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+  return points;
+}
+
 function Poster({ item, design, editable = false, onEdit }: { item: Template; design?: Design; editable?: boolean; onEdit?: (key: keyof Design, value: string) => void }) {
   const style = design?.style ?? item.style;
   const headline = design?.headline ?? item.headline;
@@ -57,7 +72,13 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
   };
   const photo = photoSources[item.layout];
   const photoLayer = photo ? <img className="poster-photo-layer" src={photo.src} alt={photo.alt} crossOrigin="anonymous" /> : null;
-  const route = <div className="route-art" aria-label="Decorative running route map"><svg viewBox="0 0 300 110" role="img"><path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/><circle cx="8" cy="78" r="4" fill="currentColor"/><circle cx="292" cy="29" r="4" fill="currentColor"/></svg></div>;
+  const gpsPoints = design?.routePolyline ? decodeRoute(design.routePolyline) : [];
+  const gpsPath = gpsPoints.length > 1 ? (() => {
+    const lats = gpsPoints.map((p) => p[0]), lngs = gpsPoints.map((p) => p[1]);
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+    return gpsPoints.map((p, i) => (i ? "L " : "M ") + (8 + (p[1] - minLng) / (maxLng - minLng || 1) * 284) + " " + (102 - (p[0] - minLat) / (maxLat - minLat || 1) * 94)).join(" ");
+  })() : "";
+  const route = <div className="route-art" aria-label={gpsPath ? "GPS route from Strava" : "Decorative running route map"}><svg viewBox="0 0 300 110" role="img">{gpsPath ? <path d={gpsPath} fill="none" stroke="#ed633b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/> : <path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/>}</svg></div>;
   const layouts: Record<string, React.ReactNode> = {
     editorial: <>{top}<div className="poster-edition">FIELD NOTES / RUN LOG NO. 018</div>{title}{custom}<div className="poster-editorial-rule"/><div className="poster-route-caption">THE DISTANCE IS THE STORY <span>↘</span></div>{route}{stats}{footer}</>,
     "night-grid": <><div className="poster-night-orbit"><span>AFTER</span><b>HOURS</b><i>RUN CLUB / EST. 05:30</i></div>{top}{title}<div className="poster-night-wave">{route}<span>01 — KEEP MOVING</span></div>{stats}{footer}</>,
