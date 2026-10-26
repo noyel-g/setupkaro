@@ -277,3 +277,20 @@
 .poster-layout-split .poster-bottom {font-size:5px;letter-spacing:0;margin-top:auto}
 .poster-layout-split .poster-split-data .poster-bottom {display:none}
 @media(max-width:760px){.poster-night-orbit b{font-size:34px}.poster-layout-type-poster .poster-title{font-size:34px}.poster-layout-personal-best .poster-title{font-size:30px}}
+
+
+/* Real sourced photography layer used by every template */
+.poster-photo-layer {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;opacity:.9;pointer-events:none}
+.poster-layout-editorial:after,.poster-layout-night-grid:after,.poster-layout-type-poster:after,.poster-layout-sunrise:after,.poster-layout-photo-frame:after,.poster-layout-personal-best:after,.poster-layout-quiet:after,.poster-layout-track:after,.poster-layout-route-map:after,.poster-layout-minimal-stats:after,.poster-layout-magazine:after,.poster-layout-split:after {content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+.poster-layout-editorial:after {background:linear-gradient(180deg,#f5f0e4e8 0%,#f5f0e4b8 35%,#f5f0e4 100%)}
+.poster-layout-night-grid:after {background:linear-gradient(180deg,#11191bd9 0%,#11191b66 42%,#11191bf5 100%)}
+.poster-layout-type-poster:after {background:linear-gradient(180deg,#ef633de8 0%,#ef633d80 38%,#ef633df2 100%)}
+.poster-layout-sunrise:after {background:linear-gradient(180deg,#f8eed7d9 0%,#e5a07e55 58%,#7e3829b8 100%)}
+.poster-layout-personal-best:after {background:linear-gradient(180deg,#ef633de8 0%,#ef633d72 48%,#ef633df5 100%)}
+.poster-layout-quiet:after {background:linear-gradient(180deg,#eeece3d9 0%,#eeece355 45%,#eeece3f5 100%)}
+.poster-layout-track:after {background:linear-gradient(180deg,#f1eee3dd 0%,#f1eee355 45%,#272821e8 100%)}
+.poster-layout-route-map:after {background:linear-gradient(180deg,#e4e9dfd9 0%,#e4e9df70 42%,#e4e9dff5 100%)}
+.poster-layout-minimal-stats:after {background:linear-gradient(180deg,#20231fe8 0%,#20231f70 48%,#20231ff5 100%)}
+.poster-layout-magazine:after {background:linear-gradient(180deg,#d9e1dce8 0%,#d9e1dc44 45%,#d9e1dcf5 100%)}
+.poster-layout-split:after {background:linear-gradient(90deg,#f8f4e8e8 0%,#f8f4e866 55%,#d85f3ce8 100%)}
+.poster-layout-photo-frame .poster-photo-window {opacity:.86}
