@@ -311,3 +311,7 @@
 .activity-row>span:last-child{font-size:18px;color:var(--orange)}
 .activity-import button:disabled{opacity:.65;cursor:wait}
 @media(max-width:650px){.activity-import{grid-template-columns:1fr;padding:16px}.activity-import>.primary-button{justify-self:start}.activity-row{gap:8px;padding:9px}.activity-row>b{font-size:10px}}
+
+.activity-import{position:relative;padding-top:42px!important}
+.activity-account-status{position:absolute;top:15px;left:22px;font:600 9px var(--mono);letter-spacing:.08em;color:#6b7866}
+.activity-import .primary-button{position:relative;z-index:1}
