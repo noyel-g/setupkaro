@@ -47,7 +47,7 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
     <div className="poster-bottom"><span {...editProps("footer")}>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>
   </div>;
 }
-function downloadPoster(item: Template, design: Design) {
+async function downloadPoster(item: Template, design: Design) {
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1480;
@@ -56,6 +56,22 @@ function downloadPoster(item: Template, design: Design) {
   const palette = palettes[design.style] ?? palettes.cream;
   ctx.fillStyle = palette.bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (design.backgroundImage) {
+    const background = new Image();
+    background.src = design.backgroundImage;
+    await new Promise<void>((resolve) => {
+      background.onload = () => resolve();
+      background.onerror = () => resolve();
+    });
+    if (background.naturalWidth > 0 && background.naturalHeight > 0) {
+      const scale = Math.max(canvas.width / background.naturalWidth, canvas.height / background.naturalHeight);
+      const width = background.naturalWidth * scale;
+      const height = background.naturalHeight * scale;
+      ctx.drawImage(background, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+      ctx.fillStyle = "#00000022";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
   ctx.fillStyle = palette.ink;
   ctx.font = "500 24px monospace";
   ctx.fillText("RS / STUDIO", 72, 80);
