@@ -109,3 +109,50 @@
 .poster-layout-split .poster-stats strong{font-size:clamp(10px,1.4vw,16px)}
 .poster-layout-split .poster-stats small{font-size:4px}
 .poster-layout-split .poster-bottom{margin-top:auto}
+
+
+/* Fix layout identifiers used by the actual template data. */
+.poster-layout-type-poster { 
+  padding: 13px 12px 12px!important;
+  background: linear-gradient(145deg,#ed633b 0 68%,#f6c7ad 68% 69%,#ed633b 69%)!important;
+}
+.poster-layout-type-poster .poster-top {font-size:5px;border-bottom:2px solid #292a24;padding-bottom:7px}
+.poster-layout-type-poster .poster-title {font-size:clamp(34px,5.2vw,59px);line-height:.78;letter-spacing:-3px;text-transform:uppercase;margin-top:16%;font-weight:800}
+.poster-layout-type-poster .poster-title span:last-child {display:inline-block!important;background:#272821;color:#f9f5e9!important;padding:3px 5px;margin-top:5px}
+.poster-layout-type-poster .route-art {height:15%;margin-bottom:8px}
+.poster-layout-type-poster .poster-stats {border:0;gap:3px}
+.poster-layout-type-poster .poster-stats>div {background:#282922;padding:7px 5px;color:#f9f5e9}
+.poster-layout-type-poster .poster-stats strong {font-size:clamp(9px,1.2vw,13px)}
+.poster-layout-type-poster .poster-stats small {font-size:4px}
+
+.poster-layout-photo-frame {
+  background:linear-gradient(180deg,#19231f 0%,#354b40 48%,#d6d1bd 48%,#d6d1bd 100%)!important;
+  padding:14px 12px 12px!important;
+}
+.poster-layout-photo-frame .poster-top {color:#f8f5eb}
+.poster-layout-photo-frame .poster-title {margin-top:40%;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(26px,3.6vw,42px);letter-spacing:-1px;color:#fffaf0}
+.poster-layout-photo-frame .poster-title span:last-child {color:#fffaf0!important}
+.poster-layout-photo-frame .route-art {height:17%;color:#263c30;margin-bottom:5px;background:#d6d1bd}
+.poster-layout-photo-frame .poster-stats {background:#d6d1bd;color:#263c30;border-color:#263c30;padding:8px 5px}
+.poster-layout-photo-frame .poster-bottom {color:#263c30}
+
+/* Give the remaining layouts distinct compositions, not just new colours. */
+.poster-layout-editorial .poster-top {border-bottom:1px solid currentColor;padding-bottom:8px}
+.poster-layout-editorial .poster-title {font-family:'Playfair Display',serif;font-size:clamp(29px,4vw,46px);font-weight:500;line-height:.95;letter-spacing:-1.8px;margin-top:18%;max-width:92%}
+.poster-layout-editorial .route-art {height:26%;margin:12px -2px 6px;padding:6px;background:#efe7d4}
+.poster-layout-editorial .poster-stats {border-top:2px solid currentColor;border-bottom:0}
+.poster-layout-editorial .poster-bottom {font-size:5px;letter-spacing:.06em}
+.poster-layout-night-grid .poster-title {margin-top:26%;font-family:var(--mono);font-weight:800}
+.poster-layout-night-grid .poster-stats {border-color:#e3c66c}
+.poster-layout-sunrise .poster-stats {border-color:#7d493d;background:#f8eed7dd;padding:7px 5px}
+.poster-layout-sunrise .poster-bottom {color:#402f2a}
+.poster-layout-personal-best .poster-top {background:#292a24;color:#f9f5e9;padding:7px;margin:-4px -4px 0}
+.poster-layout-personal-best .poster-title {font-size:clamp(31px,4.4vw,52px);font-weight:900;line-height:.83;letter-spacing:-2.7px;margin-top:28%}
+.poster-layout-quiet .poster-title {margin-top:48%;font-family:'Playfair Display',serif;font-style:italic}
+.poster-layout-quiet .route-art {display:none}
+.poster-layout-quiet .poster-stats {margin-top:auto;padding-top:14px}
+.poster-layout-track .poster-title {background:#ed633b;padding:8px;margin-left:-4px;margin-right:-4px}
+.poster-layout-route-map .poster-title {max-width:75%;margin-top:13%}
+.poster-layout-route-map .route-art {border:1px solid #9caf9c;border-radius:50% 40% 45% 35%;height:29%;padding:12px}
+.poster-layout-magazine .poster-title {border-left:4px solid #b15b40;padding-left:10px}
+.poster-layout-split .poster-title {max-width:58%;font-size:clamp(25px,3.2vw,38px)}
