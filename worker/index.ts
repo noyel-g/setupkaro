@@ -191,6 +191,39 @@ export default {
       }
     }
 
+    if (url.pathname.startsWith("/api/activities/") && request.method === "GET") {
+      const session = await getSession(request, env);
+      if (!session) return json({ error: "Connect your Strava account first." }, 401);
+      const activityId = url.pathname.slice("/api/activities/".length);
+      if (!/^\\d+$/.test(activityId)) return json({ error: "Invalid activity ID." }, 400);
+      try {
+        const accessToken = await getValidAccessToken(env, session.athlete_id);
+        const response = await fetch("https://www.strava.com/api/v3/activities/" + activityId, {
+          headers: { authorization: "Bearer " + accessToken }
+        });
+        if (!response.ok) return json({ error: "Could not load this activity from Strava." }, response.status === 404 ? 404 : 502);
+        const a = await response.json() as Record<string, any>;
+        const streamsResponse = await fetch("https://www.strava.com/api/v3/activities/" + activityId + "/streams?keys=latlng,distance,altitude,heartrate&key_by_type=true", {
+          headers: { authorization: "Bearer " + accessToken }
+        });
+        let streams: Record<string, { data?: number[][] | number[] }> = {};
+        if (streamsResponse.ok) streams = await streamsResponse.json() as typeof streams;
+        return json({ activity: {
+          id: a.id, name: a.name, type: a.type, sport_type: a.sport_type, start_date: a.start_date,
+          distance: a.distance, moving_time: a.moving_time, elapsed_time: a.elapsed_time,
+          total_elevation_gain: a.total_elevation_gain, average_speed: a.average_speed, max_speed: a.max_speed,
+          average_heartrate: a.average_heartrate, max_heartrate: a.max_heartrate, calories: a.calories,
+          map: a.map, summary_polyline: a.map?.summary_polyline ?? null,
+          route: streams.latlng?.data ?? null, route_distance: streams.distance?.data ?? null,
+          elevation: streams.altitude?.data ?? null, heartrate_stream: streams.heartrate?.data ?? null,
+          start_latlng: a.start_latlng, end_latlng: a.end_latlng, location_city: a.location_city,
+          location_state: a.location_state, location_country: a.location_country
+        }});
+      } catch (error) {
+        return json({ error: error instanceof Error ? error.message : "Unable to load activity details." }, 502);
+      }
+    }
+
     if (url.pathname.startsWith("/api/")) return json({ error: "This API endpoint is not implemented yet." }, 501);
     return env.ASSETS.fetch(request);
   }
