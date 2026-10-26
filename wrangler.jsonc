@@ -8,12 +8,5 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "runstats-studio-db",
-      "database_id": "8f8c4297-80c5-4438-8c79-c761641907a0"
-    }
-  ],
   "observability": { "enabled": true }
 }
