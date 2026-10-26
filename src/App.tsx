@@ -1,13 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type React from "react";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronDown, CircleHelp, Download, Flame, Footprints, MapPin, Plus, Route, Sparkles, Waves, X, Pencil, RotateCcw } from "lucide-react";
 
 const templates = [
   { id: "01", name: "The Sunday Long Run", kind: "EDITORIAL", style: "cream", distance: "21.10", time: "2:04:38", pace: "5:54", date: "SUNDAY, OCT 18", headline: "A LITTLE\nFARTHER." },
   { id: "02", name: "After Hours", kind: "DARK MODE", style: "dark", distance: "10.02", time: "48:12", pace: "4:48", date: "THURSDAY, OCT 22", headline: "NIGHT\nMILES." },
   { id: "03", name: "Just Keep Going", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "26:40", pace: "5:20", date: "TUESDAY, OCT 20", headline: "SHOW UP.\nRUN ON." },
+  { id: "04", name: "First Light", kind: "MINIMAL", style: "cream", distance: "8.24", time: "42:18", pace: "5:08", date: "MONDAY, OCT 19", headline: "MEET ME\nAT DAWN." },
+  { id: "05", name: "Midnight Club", kind: "DARK MODE", style: "dark", distance: "12.00", time: "1:02:44", pace: "5:14", date: "FRIDAY, OCT 16", headline: "CITY\nSLEEPING." },
+  { id: "06", name: "Personal Best", kind: "BOLD TYPE", style: "orange", distance: "5.00", time: "24:58", pace: "4:59", date: "SATURDAY, OCT 17", headline: "NEW\nPERSONAL BEST." },
+  { id: "07", name: "Quiet Miles", kind: "MINIMAL", style: "cream", distance: "6.50", time: "35:20", pace: "5:26", date: "WEDNESDAY, OCT 21", headline: "JUST ME\nAND THE ROAD." },
+  { id: "08", name: "Track Session", kind: "BOLD TYPE", style: "orange", distance: "7.20", time: "34:12", pace: "4:45", date: "TUESDAY, OCT 13", headline: "ONE MORE\nREPEAT." },
+  { id: "09", name: "The Long Way Home", kind: "EDITORIAL", style: "cream", distance: "18.60", time: "1:48:30", pace: "5:50", date: "SUNDAY, OCT 11", headline: "TAKE THE\nLONG WAY." },
+  { id: "10", name: "No Days Wasted", kind: "DARK MODE", style: "dark", distance: "4.80", time: "25:40", pace: "5:21", date: "THURSDAY, OCT 15", headline: "SMALL STEPS.\nBIG DAYS." },
+  { id: "11", name: "Weekend Ritual", kind: "EDITORIAL", style: "cream", distance: "10.00", time: "51:06", pace: "5:06", date: "SATURDAY, OCT 10", headline: "SAME TIME.\nSAME JOY." },
+  { id: "12", name: "Run Your Run", kind: "BOLD TYPE", style: "orange", distance: "3.00", time: "16:20", pace: "5:26", date: "SUNDAY, OCT 25", headline: "YOUR PACE.\nYOUR PLACE." },
 ];
 type Template = typeof templates[number];
-type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string };
+type Design = { headline: string; distance: string; time: string; pace: string; date: string; footer: string; style: string; backgroundImage: string };
 type Athlete = { id: number; firstname: string | null; lastname: string | null; profile: string | null };
 
 const palettes: Record<string, { bg: string; ink: string; accent: string }> = {
@@ -89,6 +99,7 @@ export default function App() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selected, setSelected] = useState<Template | null>(null);
   const [design, setDesign] = useState<Design | null>(null);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState("");
   const [athlete, setAthlete] = useState<Athlete | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -116,7 +127,7 @@ export default function App() {
 
   const openEditor = (item: Template) => {
     setSelected(item);
-    setDesign({ headline: item.headline, distance: item.distance, time: item.time, pace: item.pace, date: item.date, footer: "ONE RUN AT A TIME.", style: item.style });
+    setDesign({ headline: item.headline, distance: item.distance, time: item.time, pace: item.pace, date: item.date, footer: "ONE RUN AT A TIME.", style: item.style, backgroundImage: "" });
     setNotice("");
   };
   const closeEditor = () => { setSelected(null); setDesign(null); };
@@ -137,8 +148,8 @@ export default function App() {
         <div className="eyebrow"><span className="eyebrow-line"/> THE RUNNER'S CREATIVE STUDIO</div>
         <section className="hero"><div><h1>Your miles.<br/><em>Your masterpiece.</em></h1><p>Every run has a story. Give yours a place on the wall — with thoughtful, customisable posters made for runners.</p><a className="primary-button" href="#templates">Explore the templates <ArrowDownRight size={17}/></a></div><div className="hero-note"><div className="note-icon"><Flame size={20}/></div><div><strong>Made for the miles that matter.</strong><span>Long runs. First 5Ks. Ordinary Tuesdays.</span></div></div></section>
         <section className="stats-strip"><div><span className="strip-icon"><Activity size={17}/></span><strong>YOUR DATA</strong><small>Real run stats, coming soon</small></div><div><span className="strip-icon"><MapPin size={17}/></span><strong>YOUR ROUTE</strong><small>Your path, drawn beautifully</small></div><div><span className="strip-icon"><Download size={17}/></span><strong>YOUR POSTER</strong><small>Export-ready designs</small></div></section>
-        <section className="template-section" id="templates"><div className="section-heading"><div><div className="eyebrow small"><span className="eyebrow-line"/> THE STARTING LINE</div><h2>Find your format<span>.</span></h2><p>Choose a design to customise your headline, stats, colors, and export a PNG.</p></div><div className="filter-wrap"><button className="filter-button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>{filter === "ALL" ? "All templates" : templates.find((item) => item.kind === filter)?.kind}<ChevronDown size={15}/></button>{filterOpen && <div className="filter-menu">{[["ALL", "All templates"], ["EDITORIAL", "Editorial"], ["DARK MODE", "Dark mode"], ["BOLD TYPE", "Bold type"]].map(([value, label]) => <button key={value} className={filter === value ? "filter-option selected" : "filter-option"} onClick={() => { setFilter(value); setFilterOpen(false); }}><span>{label}</span>{filter === value && <Check size={14}/>}</button>)}</div>}</div></div>
-          <div className="template-grid">{visibleTemplates.map((item) => <article className="template-card" key={item.id}><button className="poster-pick" onClick={() => openEditor(item)} aria-label={`Edit ${item.name}`}><div className="poster-frame"><Poster item={item}/><span className="template-number">{item.id} / 03</span><span className="poster-hover-label">CUSTOMISE POSTER ↗</span></div></button><div className="template-info"><div><h3>{item.name}</h3><span className="template-kind">{item.kind}</span></div><button className="select-button" aria-label={`Edit ${item.name}`} title="Customize template" onClick={() => openEditor(item)}><Plus size={18}/></button></div></article>)}</div>
+        <section className="template-section" id="templates"><div className="section-heading"><div><div className="eyebrow small"><span className="eyebrow-line"/> THE STARTING LINE</div><h2>Find your format<span>.</span></h2><p>Choose a design to customise your headline, stats, colors, and export a PNG.</p></div><div className="filter-wrap"><button className="filter-button" aria-expanded={filterOpen} onClick={() => setFilterOpen((open) => !open)}>{filter === "ALL" ? "All templates" : templates.find((item) => item.kind === filter)?.kind}<ChevronDown size={15}/></button>{filterOpen && <div className="filter-menu">{[["ALL", "All templates"], ["EDITORIAL", "Editorial"], ["DARK MODE", "Dark mode"], ["BOLD TYPE", "Bold type"], ["MINIMAL", "Minimal"]].map(([value, label]) => <button key={value} className={filter === value ? "filter-option selected" : "filter-option"} onClick={() => { setFilter(value); setFilterOpen(false); }}><span>{label}</span>{filter === value && <Check size={14}/>}</button>)}</div>}</div></div>
+          <div className="template-grid">{visibleTemplates.map((item) => <article className="template-card" key={item.id}><button className="poster-pick" onClick={() => openEditor(item)} aria-label={`Edit ${item.name}`}><div className="poster-frame"><Poster item={item}/><span className="template-number">{item.id} / {String(templates.length).padStart(2, "0")}</span><span className="poster-hover-label">CUSTOMISE POSTER ↗</span></div></button><div className="template-info"><div><h3>{item.name}</h3><span className="template-kind">{item.kind}</span></div><button className="select-button" aria-label={`Edit ${item.name}`} title="Customize template" onClick={() => openEditor(item)}><Plus size={18}/></button></div></article>)}</div>
         </section>
         <section className="bottom-banner"><div className="banner-symbol"><Footprints size={23}/></div><div><strong>Good things take miles.</strong><p>Personalise a poster with sample stats and export a PNG. Strava sync comes later.</p></div><span className="banner-tag">BUILT FOR RUNNERS, BY RUNNERS</span></section>
         <footer><span>© 2026 RUNSTATS STUDIO</span><span>MADE FOR THE LOVE OF THE RUN <span className="footer-heart">♥</span></span></footer>
