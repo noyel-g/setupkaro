@@ -31,21 +31,33 @@ function Poster({ item, design, editable = false, onEdit }: { item: Template; de
   const headline = design?.headline ?? item.headline;
   const palette = palettes[style] ?? palettes.cream;
   const editProps = (key: keyof Design) => editable ? {
-    contentEditable: true as const,
-    suppressContentEditableWarning: true,
-    spellCheck: false,
+    contentEditable: true as const, suppressContentEditableWarning: true, spellCheck: false,
     onBlur: (event: React.FocusEvent<HTMLElement>) => onEdit?.(key, event.currentTarget.innerText.replace(/\r/g, "")),
     onClick: (event: React.MouseEvent<HTMLElement>) => event.stopPropagation(),
-    className: "canvas-editable",
-    title: "Click and type to edit",
+    className: "canvas-editable", title: "Click and type to edit",
   } : {};
-  return <div className={`poster poster-${style} poster-layout-${item.layout} ${editable ? "poster-edit-mode" : ""}`} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? `linear-gradient(#00000022,#00000022), url("${design.backgroundImage}")` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
-    <div className="poster-top"><span>RS / STUDIO</span><span {...editProps("date")}>{design?.date ?? item.date}</span></div>
-    <div className="poster-title" style={{ whiteSpace: "pre-line" }} {...editProps("headline")}>{headline}</div>
-    {design?.customText && <div className="poster-custom-text" {...editProps("customText")}>{design.customText}</div>}
-    <div className="route-art" aria-label="Decorative running route map"><svg viewBox="0 0 300 110" role="img"><path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/><circle cx="8" cy="78" r="4" fill="currentColor"/><circle cx="292" cy="29" r="4" fill="currentColor"/></svg></div>
-    <div className="poster-stats"><div><strong {...editProps("distance")}>{design?.distance ?? item.distance}</strong><small>KILOMETRES</small></div><div><strong {...editProps("time")}>{design?.time ?? item.time}</strong><small>TIME</small></div><div><strong {...editProps("pace")}>{design?.pace ?? item.pace}</strong><small>MIN / KM</small></div></div>
-    <div className="poster-bottom"><span {...editProps("footer")}>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>
+  const title = <div className="poster-title" style={{ whiteSpace: "pre-line" }} {...editProps("headline")}>{headline}</div>;
+  const custom = design?.customText ? <div className="poster-custom-text" {...editProps("customText")}>{design.customText}</div> : null;
+  const stats = <div className="poster-stats"><div><strong {...editProps("distance")}>{design?.distance ?? item.distance}</strong><small>KILOMETRES</small></div><div><strong {...editProps("time")}>{design?.time ?? item.time}</strong><small>TIME</small></div><div><strong {...editProps("pace")}>{design?.pace ?? item.pace}</strong><small>MIN / KM</small></div></div>;
+  const top = <div className="poster-top"><span>RS / STUDIO</span><span {...editProps("date")}>{design?.date ?? item.date}</span></div>;
+  const footer = <div className="poster-bottom"><span {...editProps("footer")}>{design?.footer ?? "ONE RUN AT A TIME."}</span><span>RUNSTATS STUDIO ↗</span></div>;
+  const route = <div className="route-art" aria-label="Decorative running route map"><svg viewBox="0 0 300 110" role="img"><path d="M8 78 C24 82 35 20 66 36 S99 97 127 66 S154 11 183 32 S212 88 241 60 S270 18 292 29" fill="none" stroke="currentColor" strokeWidth="2.4" strokeDasharray="4 5"/><circle cx="8" cy="78" r="4" fill="currentColor"/><circle cx="292" cy="29" r="4" fill="currentColor"/></svg></div>;
+  const layouts: Record<string, React.ReactNode> = {
+    editorial: <>{top}<div className="poster-edition">FIELD NOTES / RUN LOG NO. 018</div>{title}{custom}<div className="poster-editorial-rule"/><div className="poster-route-caption">THE DISTANCE IS THE STORY <span>↘</span></div>{route}{stats}{footer}</>,
+    "night-grid": <><div className="poster-night-orbit"><span>AFTER</span><b>HOURS</b><i>RUN CLUB / EST. 05:30</i></div>{top}{title}<div className="poster-night-wave">{route}<span>01 — KEEP MOVING</span></div>{stats}{footer}</>,
+    "type-poster": <><div className="poster-type-index">RUN / REPEAT / RECOVER</div>{title}<div className="poster-type-stamp">NO EXCUSES<br/>JUST MILES.</div>{custom}{stats}{footer}</>,
+    sunrise: <><div className="poster-sun-disc"/><div className="poster-sun-horizon"/>{top}{title}<div className="poster-sun-subtitle">THE WORLD IS QUIET. SO ARE YOUR DOUBTS.</div>{route}{custom}{stats}{footer}</>,
+    "photo-frame": <><div className="poster-photo-window"><div className="poster-photo-sky"/><div className="poster-photo-moon"/><div className="poster-photo-city"><i/><i/><i/><i/><i/><i/><i/></div><div className="poster-photo-road"/></div>{top}<div className="poster-photo-title">{title}<span>RUN AFTER DARK / VOL. 01</span></div>{custom}{stats}{footer}</>,
+    "personal-best": <><div className="poster-pb-kicker">THE WORK PAID OFF</div>{top}{title}<div className="poster-pb-medal"><span>PB</span><b {...editProps("time")}>{design?.time ?? item.time}</b><small>NEW PERSONAL BEST</small></div>{custom}{stats}{footer}</>,
+    quiet: <><div className="poster-quiet-mark">○</div>{top}<div className="poster-quiet-title">{title}<span>somewhere between breath and belief.</span></div>{custom}{route}{stats}{footer}</>,
+    track: <><div className="poster-track-header"><span>SESSION 08</span><span>400M REPEATS</span></div>{title}<div className="poster-track-lanes"><i/><i/><i/><i/><b>PACE YOURSELF</b></div>{custom}{stats}{footer}</>,
+    "route-map": <>{top}<div className="poster-map-heading">{title}<span>GPS TRACE / OUT & BACK</span></div><div className="poster-map-visual"><svg viewBox="0 0 300 240" role="img"><path d="M18 190 L42 160 L36 130 L82 116 L96 78 L137 91 L154 46 L185 62 L202 104 L238 111 L258 76 L284 88 L266 132 L231 150 L220 191 L175 202 L149 170 L103 190 L72 174 L42 205 Z" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M18 190 C48 174 43 134 82 116 S106 91 137 91 S139 48 185 62 S211 121 258 76" fill="none" stroke="#ed633b" strokeWidth="5" strokeLinecap="round"/><circle cx="18" cy="190" r="6" fill="#ed633b"/><circle cx="258" cy="76" r="6" fill="#ed633b"/></svg><span>START ●</span><span>FINISH ↗</span></div>{custom}{stats}{footer}</>,
+    "minimal-stats": <><div className="poster-minimal-label">TODAY, WELL SPENT.</div>{top}{title}{custom}<div className="poster-minimal-hero-number">{design?.distance ?? item.distance}<small>KM COMPLETED</small></div><div className="poster-minimal-secondary">{stats}</div>{footer}</>,
+    magazine: <><div className="poster-magazine-masthead">PACE <span>THE RUN JOURNAL</span><b>№ 026</b></div>{title}<div className="poster-magazine-photo"><div className="poster-magazine-sun"/><div className="poster-magazine-hill"/><div className="poster-magazine-runner">↗</div><span>THE WEEKEND ISSUE</span></div>{custom}{stats}{footer}</>,
+    split: <><div className="poster-split-copy">{top}{title}<div className="poster-split-vertical">RUN YOUR OWN RACE — SINCE ALWAYS</div>{custom}{footer}</div><div className="poster-split-data"><span>YOUR SESSION</span>{stats}<div className="poster-split-mark">RS<span>®</span></div></div></>,
+  };
+  return <div className={"poster poster-" + style + " poster-layout-" + item.layout + (editable ? " poster-edit-mode" : "")} style={{ backgroundColor: palette.bg, color: palette.ink, backgroundImage: design?.backgroundImage ? 'linear-gradient(#00000022,#00000022), url("' + design.backgroundImage + '")' : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
+    {layouts[item.layout] ?? <>{top}{title}{custom}{route}{stats}{footer}</>}
   </div>;
 }
 async function downloadPoster(item: Template, design: Design) {
