@@ -198,16 +198,31 @@ async function downloadPoster(item: Template, design: Design) {
     ctx.font = "bold 34px Arial, sans-serif";
     ctx.fillText(design.customText.slice(0, 45), 72, 650, 930);
   }
-  ctx.strokeStyle = palette.ink;
+  ctx.strokeStyle = design.routePolyline ? "#ed633b" : palette.ink;
   ctx.lineWidth = 5;
-  ctx.setLineDash([10, 14]);
-  ctx.beginPath();
-  ctx.moveTo(80, 770);
-  ctx.bezierCurveTo(180, 850, 210, 650, 330, 740);
-  ctx.bezierCurveTo(450, 850, 510, 620, 650, 720);
-  ctx.bezierCurveTo(780, 820, 850, 660, 1000, 710);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  if (design.routePolyline) {
+    const points = decodeRoute(design.routePolyline);
+    if (points.length > 1) {
+      const lats = points.map((p) => p[0]), lngs = points.map((p) => p[1]);
+      const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        const x = 80 + (p[1] - minLng) / (maxLng - minLng || 1) * 920;
+        const y = 900 - (p[0] - minLat) / (maxLat - minLat || 1) * 190;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke();
+    }
+  } else {
+    ctx.setLineDash([10, 14]);
+    ctx.beginPath();
+    ctx.moveTo(80, 770);
+    ctx.bezierCurveTo(180, 850, 210, 650, 330, 740);
+    ctx.bezierCurveTo(450, 850, 510, 620, 650, 720);
+    ctx.bezierCurveTo(780, 820, 850, 660, 1000, 710);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
   ctx.beginPath();
   ctx.moveTo(72, 1030); ctx.lineTo(1008, 1030);
   ctx.moveTo(72, 1195); ctx.lineTo(1008, 1195);
