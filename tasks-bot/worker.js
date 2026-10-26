@@ -80,6 +80,7 @@ async function workerStatus(env, id) {
 // ================= WORKER COMMANDS =================
 const HELP = `<b>SetupKaro Tasks — help</b>
 /start — begin / see status
+/rules — must-read: what is this work, payment, risks
 /profile — your application, tasks & payments
 /tasks — available tasks (approved workers)
 /mytasks — your active, pending & past work
@@ -87,18 +88,60 @@ const HELP = `<b>SetupKaro Tasks — help</b>
 /help — this message
 Send /start anytime to return to the main menu.`;
 
+const RULES = `<b>📖 Read Before You Start — Reddit Posting Work</b>
+
+<b>1. What is this task?</b>
+Clients want promotion / other work on Reddit. You post from your own active Reddit account as instructed.
+We need good, active accounts. Moderate to High quality or good karma preferred. Higher quality = higher pay (₹150-₹500 per post).
+
+<b>2. Payment</b>
+• ₹150 – ₹500 per post, as per post requirement
+• Moderate to High accounts get higher amount
+• Payment is NOT instant
+• Post must stay live in the subreddit for at least 48 hours, then you get paid
+
+<b>3. Problems while posting — be careful</b>
+• If you post out of nowhere, Reddit filters may mark you as spam and ban you
+• Each subreddit has its own rules — read them before posting
+• Using a secondary account is better / safer for you
+
+<b>4. Why can't I see all tasks?</b>
+In /tasks you only see tasks your account qualifies for. If you are not seeing a task, your account may be inactive, low karma, or low CQS.
+
+<b>5. Reddit + CQS screenshot required</b>
+When you apply, send Reddit username + CQS screenshot.
+How to check CQS:
+1. Go to r/whatismycqs
+2. Post with title: what is my cqs
+3. Just below your title you will see your CQS — take a screenshot and send it here.`;
+
+const CQS_HOWTO = `How to check CQS:
+1. Go to r/whatismycqs
+2. Post with title: what is my cqs
+3. Just below your title you will see your CQS — screenshot it and send here.`;
+
+const TASKS_FOOTER = `ℹ️ Only tasks your account qualifies for are shown here. If you are not seeing a task, your account may be inactive, low karma, or low CQS. Payment is only after your post stays live 48 hours.`;
+
 async function cmdStart(env, chatId, from) {
   const st = await workerStatus(env, from.id);
   const kb = st === 'approved'
-    ? { inline_keyboard: [[{ text: '📋 View tasks', callback_data: 'w:tasks' }], [{ text: '👤 My profile', callback_data: 'w:profile' }]] }
-    : { inline_keyboard: [[{ text: '📝 Submit Reddit Profile', callback_data: 'w:apply' }]] };
+    ? { inline_keyboard: [[{ text: '📋 View tasks', callback_data: 'w:tasks' }], [{ text: '👤 My profile', callback_data: 'w:profile' }], [{ text: '📖 Read Before Start', callback_data: 'w:rules' }]] }
+    : { inline_keyboard: [[{ text: '📖 Read Before Start', callback_data: 'w:rules' }], [{ text: '📝 Submit Reddit Profile', callback_data: 'w:apply' }]] };
   const extra = st === 'approved'
     ? '\n\nYour application is <b>approved</b> — tasks are open to you.'
     : st ? `\n\nApplication status: <b>${esc(st)}</b>.`
     : '';
   await send(env, chatId,
-    `Welcome to <b>SetupKaro</b>.\n\nWe connect workers with paid online tasks.\n\nTo apply for available tasks, submit your Reddit profile for review.${extra}`,
+    `Welcome to <b>SetupKaro</b>.\n\nPaid Reddit posting tasks (₹150-₹500/post). You post from your active account, post must stay live 48 hours to get paid. Moderate-High / good karma accounts earn more.\n\n⚠️ Please tap <b>Read Before Start</b> first — it explains payment, spam/ban risk, subreddit rules, and why some tasks may not show for low karma/CQS.${extra}`,
     { reply_markup: kb });
+}
+
+async function cmdRules(env, chatId, from) {
+  const st = await workerStatus(env, from.id);
+  const btn = st === 'approved'
+    ? [[{ text: '📋 View tasks', callback_data: 'w:tasks' }]]
+    : [[{ text: '📝 I Agree — Submit Reddit Profile', callback_data: 'w:apply' }]];
+  await send(env, chatId, RULES, { reply_markup: { inline_keyboard: btn } });
 }
 
 async function cmdProfile(env, chatId, from) {
@@ -121,13 +164,14 @@ async function cmdTasks(env, chatId, from) {
     return;
   }
   const list = (await env.DB.prepare("SELECT * FROM tasks WHERE status='open' ORDER BY id DESC LIMIT 15").all()).results;
-  if (!list.length) { await send(env, chatId, `No open tasks right now. You'll be notified here when one drops.`); return; }
+  if (!list.length) { await send(env, chatId, `No open tasks right now. You'll be notified here when one drops.\n\n${TASKS_FOOTER}`); return; }
   for (const t of list) {
     const n = await env.DB.prepare("SELECT COUNT(*) c FROM assignments WHERE task_id=? AND status IN ('accepted','submitted','completed')").bind(t.id).first();
     await send(env, chatId,
       `📌 <b>${esc(t.title)}</b>\nTarget: r/${esc(t.subreddit)}\nPayment: <b>${inr(t.amount)}</b>\nSlots: ${n.c}/${t.needed}${t.deadline ? `\nDeadline: ${esc(t.deadline)}` : ''}`,
       { reply_markup: { inline_keyboard: [[{ text: '👁 View Task', callback_data: `w:view:${t.id}` }]] } });
   }
+  await send(env, chatId, TASKS_FOOTER);
 }
 
 async function cmdMyTasks(env, chatId, from) {
@@ -293,10 +337,11 @@ async function onCb(env, cb) {
   const ack = (t = '') => answerCb(env, cb.id, t);
 
   if (ns === 'w') {
+    if (act === 'rules') { await ack(); await cmdRules(env, chatId, from); return; }
     if (act === 'apply') {
       await ack();
       await setSess(env, from.id, 'await_reddit', {});
-      await send(env, chatId, `Please send your Reddit username or your public Reddit profile link.\n\nIf your profile is private, just send a <b>screenshot photo</b> instead.\n\n<i>We never ask for passwords or logins — username only.</i>`);
+      await send(env, chatId, `📝 <b>Submit Reddit Profile + CQS</b>\n\n1. Send your Reddit username or public profile link (e.g. <code>u/someone</code>)\n2. + Send CQS screenshot photo\n\n${CQS_HOWTO}\n\n<i>We never ask for passwords or logins — username + screenshot only. Moderate-High / good karma preferred. Payment ₹150-₹500/post, only after post stays live 48 hours.</i>`);
       return;
     }
     if (act === 'tasks') { await ack(); await cmdTasks(env, chatId, from); return; }
@@ -306,7 +351,7 @@ async function onCb(env, cb) {
       const t = await env.DB.prepare('SELECT * FROM tasks WHERE id=?').bind(+arg).first();
       if (!t || t.status !== 'open') { await send(env, chatId, `That task is closed.`); return; }
       await send(env, chatId,
-        `📌 <b>${esc(t.title)}</b>${t.client ? `\nClient: ${esc(t.client)}` : ''}${t.subreddit ? `\nTarget: r/${esc(t.subreddit)}` : ''}\nPayment: <b>${inr(t.amount)}</b>${t.deadline ? `\nDeadline: ${esc(t.deadline)}` : ''}\n\n<b>Details:</b>\n${esc(t.content)}${t.instructions ? `\n\n<i>${esc(t.instructions)}</i>` : ''}${t.subreddit ? `\n\n⚠️ <i>You are responsible for checking and following the rules of r/${esc(t.subreddit)} before posting.</i>` : `\n\n⚠️ <i>Post only where the community rules allow this kind of content.</i>`}`,
+        `📌 <b>${esc(t.title)}</b>${t.client ? `\nClient: ${esc(t.client)}` : ''}${t.subreddit ? `\nTarget: r/${esc(t.subreddit)}` : ''}\nPayment: <b>${inr(t.amount)}</b>${t.deadline ? `\nDeadline: ${esc(t.deadline)}` : ''}\n\n<b>Details:</b>\n${esc(t.content)}${t.instructions ? `\n\n<i>${esc(t.instructions)}</i>` : ''}${t.subreddit ? `\n\n⚠️ <i>You are responsible for checking and following the rules of r/${esc(t.subreddit)} before posting.</i>` : `\n\n⚠️ <i>Post only where the community rules allow this kind of content.</i>`}\n\n💰 Payment <b>${inr(t.amount)}</b> (range ₹150-₹500 as per requirement) — NOT instant, only after post stays live 48 hours.\n🚫 Posting out of nowhere can trigger spam filters / ban. Read subreddit rules first. Using a secondary account is safer.`,
         { reply_markup: { inline_keyboard: [[{ text: '✅ Accept Task', callback_data: `w:accept:${t.id}` }]] } });
       try {
         for (const fid of JSON.parse(t.image_ids || '[]').slice(0, 5)) {
@@ -330,7 +375,7 @@ async function onCb(env, cb) {
       if (n.c + 1 >= t.needed) await env.DB.prepare("UPDATE tasks SET status='closed' WHERE id=?").bind(tid).run();
       await ack('Assigned ✓');
       await send(env, chatId,
-        `✅ <b>Task assigned.</b>\n\nComplete it per the instructions and the rules of r/${esc(t.subreddit)}.\n\nAfter completing it, submit the Reddit post link here.`,
+        `✅ <b>Task assigned.</b>\n\nComplete it per the instructions and the rules of r/${esc(t.subreddit)}.\n\n⚠️ Check r/${esc(t.subreddit)} rules before posting. Posting out of nowhere can look like spam and get you banned. Secondary account is safer.\n\n💰 Payment ${inr(t.amount)} is NOT instant — post must stay live at least 48 hours.\n\nAfter completing it, submit the Reddit post link here.`,
         { reply_markup: { inline_keyboard: [[{ text: '📤 Submit Reddit Post', callback_data: `w:submit:${tid}` }]] } });
       return;
     }
@@ -481,6 +526,7 @@ async function onMsg(env, msg) {
     }
     await clearSess(env, from.id);
     if (cmd === '/start') return cmdStart(env, chatId, from);
+    if (cmd === '/rules') { await clearSess(env, from.id); return cmdRules(env, chatId, from); }
     if (cmd === '/help') return send(env, chatId, HELP + (admin ? `\n\n<b>Admin:</b> /admin /createtask` : ''));
     if (cmd === '/profile') return cmdProfile(env, chatId, from);
     if (cmd === '/tasks') return cmdTasks(env, chatId, from);
@@ -500,27 +546,56 @@ async function onMsg(env, msg) {
 
   const sess = await getSess(env, from.id);
   if (sess.state === 'await_reddit') {
-    const user = parseReddit(text);
-    if (!user && !photoId) { await send(env, chatId, `Couldn't read that. Send like <code>u/someone</code>, the full profile link — or just send a <b>screenshot photo</b> of your profile.`); return; }
-    const proofType = photoId ? 'screenshot' : 'none';
+    const prev = sess.data || {};
+    const user = parseReddit(text) || prev.reddit_user || '';
+    const cqsPhoto = photoId || prev.cqs_file_id || '';
+    if (!user && !cqsPhoto) { await send(env, chatId, `Couldn't read that. Send like <code>u/someone</code> or full profile link, plus your CQS screenshot photo.\\n\\n` + CQS_HOWTO); return; }
+    if (!user) {
+      await setSess(env, from.id, 'await_reddit', { cqs_file_id: cqsPhoto });
+      await send(env, chatId, `Got your screenshot. Now send your Reddit username / profile link (e.g. <code>u/someone</code>).`);
+      return;
+    }
+    if (!cqsPhoto) {
+      await setSess(env, from.id, 'await_cqs', { reddit_user: user });
+      await send(env, chatId, `Got u/${esc(user)}. Now send your <b>CQS screenshot</b>.\\n\\n` + CQS_HOWTO);
+      return;
+    }
+    const proofType = 'screenshot';
     const info0 = user ? await redditInfo(user) : null;
     await env.DB.prepare("INSERT INTO applications (tg_id, tg_username, reddit_user, proof_type, proof_file_id, status, created_at) VALUES (?,?,?,?,?,'pending',?)")
-      .bind(from.id, from.username || '', user || '', proofType, photoId || '', now()).run();
+      .bind(from.id, from.username || '', user || '', proofType, cqsPhoto || '', now()).run();
     await env.DB.prepare("INSERT INTO workers (tg_id, tg_username, reddit_user, reddit_created, link_karma, comment_karma, status, created_at) VALUES (?,?,?,?,?,?,'pending',?) ON CONFLICT(tg_id) DO UPDATE SET tg_username=excluded.tg_username, reddit_user=excluded.reddit_user, reddit_created=excluded.reddit_created, link_karma=excluded.link_karma, comment_karma=excluded.comment_karma, status='pending'")
       .bind(from.id, from.username || '', user || '', info0 ? info0.createdUtc : 0, info0 ? info0.linkN : 0, info0 ? info0.commentN : 0, now()).run();
     await clearSess(env, from.id);
-    await send(env, chatId, `Your application has been submitted successfully.\n\nOur team will review your profile and get back to you here.`);
+    await send(env, chatId, `Your application (u/${esc(user)} + CQS screenshot) has been submitted successfully.\\n\\nOur team will review your profile and get back to you here.`);
     for (const aid of String(env.ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean)) {
       const info = info0;
       const rline = user
-        ? `Reddit: u/${esc(user)} — https://www.reddit.com/user/${encodeURIComponent(user)}\n${info ? `Age: ${info.created} • karma ${info.link}/${info.comment} • quality-proxy: ${cqsTier(info.createdUtc ? Math.floor((now() - info.createdUtc) / 86400) : 0, info.linkN + info.commentN)}` : `Reddit info unavailable — check manually.`}`
-        : `Reddit: 📷 screenshot only (private profile)`;
+        ? `Reddit: u/${esc(user)} — https://www.reddit.com/user/${encodeURIComponent(user)}\n${info ? `Age: ${info.created} • karma ${info.link}/${info.comment} • quality-proxy: ${cqsTier(info.createdUtc ? Math.floor((now() - info.createdUtc) / 86400) : 0, info.linkN + info.commentN)}` : `Reddit info unavailable — check manually.`} \nCQS: screenshot attached (verify manually in r/whatismycqs style).`
+        : `Reddit: screenshot only (private profile)`;
       const body = `📥 <b>New application</b>\nTelegram: @${esc(from.username || '?')} (<code>${from.id}</code>)\n${rline}\n\nUse /admin → Applications to decide.`;
-      if (photoId) {
-        await tg(env, 'sendPhoto', { chat_id: +aid, photo: photoId, caption: body.slice(0, 1000), parse_mode: 'HTML' }).catch(() => {});
+      if (cqsPhoto) {
+        await tg(env, 'sendPhoto', { chat_id: +aid, photo: cqsPhoto, caption: body.slice(0, 1000), parse_mode: 'HTML' }).catch(() => {});
       } else {
         await send(env, +aid, body).catch(() => {});
       }
+    }
+    return;
+  }
+  if (sess.state === 'await_cqs') {
+    if (!photoId) { await send(env, chatId, `Please send your <b>CQS screenshot photo</b> now.\\n\\n` + CQS_HOWTO); return; }
+    const user2 = (sess.data && sess.data.reddit_user) || parseReddit(text) || '';
+    if (!user2) { await clearSess(env, from.id); await send(env, chatId, `Session expired. Tap Submit Reddit Profile again.`); return; }
+    const info0b = await redditInfo(user2);
+    await env.DB.prepare("INSERT INTO applications (tg_id, tg_username, reddit_user, proof_type, proof_file_id, status, created_at) VALUES (?,?,?,?,?,'pending',?)")
+      .bind(from.id, from.username || '', user2, 'screenshot', photoId, now()).run();
+    await env.DB.prepare("INSERT INTO workers (tg_id, tg_username, reddit_user, reddit_created, link_karma, comment_karma, status, created_at) VALUES (?,?,?,?,?,?,'pending',?) ON CONFLICT(tg_id) DO UPDATE SET tg_username=excluded.tg_username, reddit_user=excluded.reddit_user, reddit_created=excluded.reddit_created, link_karma=excluded.link_karma, comment_karma=excluded.comment_karma, status='pending'")
+      .bind(from.id, from.username || '', user2, info0b ? info0b.createdUtc : 0, info0b ? info0b.linkN : 0, info0b ? info0b.commentN : 0, now()).run();
+    await clearSess(env, from.id);
+    await send(env, chatId, `Your application (u/${esc(user2)} + CQS screenshot) has been submitted successfully.\\n\\nOur team will review your profile and get back to you here.`);
+    for (const aid of String(env.ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean)) {
+      const body2 = `📥 <b>New application</b>\nTelegram: @${esc(from.username || '?')} (<code>${from.id}</code>)\nReddit: u/${esc(user2)} — https://www.reddit.com/user/${encodeURIComponent(user2)}\nCQS: screenshot attached.\n\nUse /admin → Applications to decide.`;
+      await tg(env, 'sendPhoto', { chat_id: +aid, photo: photoId, caption: body2.slice(0, 1000), parse_mode: 'HTML' }).catch(() => {});
     }
     return;
   }
