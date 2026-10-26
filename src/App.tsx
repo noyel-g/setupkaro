@@ -66,7 +66,7 @@ function parseActivityFile(xmlText: string, fileName: string) {
   const date=times.length?new Date(Math.min(...times)):null;
   const duration=Math.floor(seconds/3600)+":"+String(Math.floor(seconds%3600/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
   const base=fileName.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").trim().toUpperCase();
-  return {headline:(base||"YOUR RUN").slice(0,40),distance:km.toFixed(2),time:duration,pace:seconds>0&&km>0?((seconds/60)/km).toFixed(2):"--",date:date?date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase():"ACTIVITY IMPORT",footer:Math.round(gain)+" M ELEVATION GAIN",routePolyline:encoded,pointCount:rows.length};
+  return {headline:(base||"YOUR RUN").slice(0,40),distance:km.toFixed(2),time:duration,pace:seconds>0&&km>0?Math.floor(seconds/km/60)+":"+String(Math.round(seconds/km%60)).padStart(2,"0"):"--",date:date?date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase():"ACTIVITY IMPORT",footer:Math.round(gain)+" M ELEVATION GAIN",routePolyline:encoded,pointCount:rows.length};
 }
 
 function decodeRoute(encoded: string) {
