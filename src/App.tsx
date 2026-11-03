@@ -107,26 +107,17 @@ function App() {
           <div className="hero-buttons"><button className="button button-lime" onClick={() => openQuote()}>Tell us what you need <ArrowUpRight size={16}/></button><a className="text-link" href="#work">Explore our work <ArrowDownRight size={15}/></a></div>
           <div className="hero-note"><span className="note-icon"><Sparkles size={15}/></span><span><strong>One point of contact.</strong> A hand-picked team behind the work.</span></div>
         </div>
-        <div className="hero-visual" aria-label="Abstract website design composition">
-          <div className="visual-topline"><span>THE DIGITAL WORKSHOP</span><span>EST. FOR WHAT'S NEXT ↗</span></div>
-          <div className="visual-window">
-            <div className="window-bar"><div className="window-dots"><i/><i/><i/></div><span>your-next-big-thing.com</span><span className="window-menu">•••</span></div>
-            <div className="window-content">
-              <div className="window-kicker">A BETTER WAY TO SHOW UP</div>
-              <div className="window-headline">Built around<br/><em>your business.</em></div>
-              <div className="window-line"/>
-              <div className="window-bottom"><span>DESIGN / STRATEGY / DIGITAL</span><span className="window-arrow"><ArrowUpRight size={18}/></span></div>
-            </div>
-          </div>
-          <div className="floating-chip chip-one"><span className="chip-icon"><Code2 size={15}/></span><span><b>Web experiences</b><small>Designed with purpose</small></span></div>
-          <div className="floating-chip chip-two"><span className="chip-icon chip-icon-lime"><Zap size={15}/></span><span><b>Creative that connects</b><small>Made to move people</small></span></div>
-          <div className="visual-stamp">GOOD<br/>IDEAS<br/><em>LIVE</em><span>HERE ↗</span></div>
-          <div className="visual-orbit"/>
+        <div className="hero-visual kolumna-collage" aria-label="Editorial collage showing digital design, video and creative work">
+          <div className="collage-image collage-main"><img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1100&q=88" alt="Modern creative studio workspace"/><span className="collage-caption">01 / DIGITAL EXPERIENCES</span></div>
+          <div className="collage-image collage-top"><img src="https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=700&q=88" alt="Graphic design composition"/><span className="collage-caption">02 / VISUAL IDENTITY</span></div>
+          <div className="collage-image collage-bottom"><img src="https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=700&q=88" alt="Video production camera setup"/><span className="collage-caption">03 / MOTION & FILM</span></div>
+          <div className="collage-sticker"><span>IDEAS</span><b>IN<br/>MOTION.</b><i>SETUPKARO ↗</i></div>
+          <div className="collage-index">INDEPENDENT DIGITAL STUDIO<br/>KERALA · WORKING EVERYWHERE</div>
         </div>
         <div className="hero-bottomline"><span>INDEPENDENT DIGITAL SERVICES STUDIO</span><span>INDIA ↔ WORLDWIDE</span><span>SCROLL TO EXPLORE ↓</span></div>
       </section>
 
-      <section className="intro-strip"><p>Good work starts with <em>a clear conversation.</em></p><span>We bring the right people and skills together to make your project happen.</span></section>
+      <section className="intro-strip"><p>Good work starts with <em>good ideas.</em></p><span>WEB DESIGN&nbsp;&nbsp; / &nbsp;&nbsp;VIDEO&nbsp;&nbsp; / &nbsp;&nbsp;IDENTITY&nbsp;&nbsp; / &nbsp;&nbsp;DIGITAL</span></section>
 
       <section className="services section-wrap" id="services">
         <div className="section-heading"><div><div className="eyebrow"><span className="eyebrow-line"/> WHAT WE CAN DO</div><h2>Digital essentials.<br/><em>Done thoughtfully.</em></h2></div><p>Start with one thing you need. We’ll help shape the scope, bring in the right specialists and keep the work moving.</p></div>
