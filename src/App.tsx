@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type React from "react";
+import type { FormEvent } from "react";
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Check, ChevronDown, Code2,
   Globe2, Layers3, Menu, MonitorSmartphone, Palette, Play, Send,
@@ -57,7 +57,7 @@ function App() {
     setMobileOpen(false);
   }
 
-  async function submitEnquiry(event: React.FormEvent<HTMLFormElement>) {
+  async function submitEnquiry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = [
       "SETUPKARO PROJECT ENQUIRY",
