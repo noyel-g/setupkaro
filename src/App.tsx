@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type React from "react";
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Check, ChevronDown, Code2,
   Globe2, Layers3, Menu, MonitorSmartphone, Palette, Play, Send,
