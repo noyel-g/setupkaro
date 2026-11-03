@@ -21,7 +21,7 @@ const projects = [
   { category: "DIGITAL / CONCEPT", title: "Make room for better work.", type: "SaaS landing page concept", tone: "saas", label: "Northstar", description: "A focused product page built around a clear value proposition." }
 ];
 
-const packages = {
+const packages: Record<Market, { name: string; price: string; note: string; features: string[]; featured?: boolean }[]> = {
   IN: [
     { name: "Starter", price: "₹7,999", note: "A clean first step online.", features: ["Up to 3 pages", "Responsive design", "Contact form / enquiry CTA", "Basic on-page SEO", "One revision round"] },
     { name: "Professional", price: "₹14,999", note: "For businesses ready to grow.", features: ["Up to 5 pages", "Custom visual direction", "Enquiry form", "Basic SEO setup", "Two revision rounds"], featured: true },
