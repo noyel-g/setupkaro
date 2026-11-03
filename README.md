@@ -1,32 +1,54 @@
-# Daymark
+# SetupKaro — Digital Services
 
-A quiet, local-first daily journal for capturing everyday moments. Notes are grouped by date and type, with a simple task list, searchable timeline, tags, and Markdown-friendly writing.
+A responsive digital services agency website for SetupKaro, serving businesses in India and internationally.
 
-## Features
+## What is included
 
-- **Today page** — keep a day-by-day record of small moments, thoughts, reading notes, exercise, ideas, work, and more.
-- **Timeline** — browse past entries by date or search across titles, body text, types, and tags.
-- **Type-based organization** — entries are grouped by what they are, while tags add another layer of context.
-- **Tasks** — keep a lightweight list next to the journal, with due dates and completed tasks.
-- **Markdown-friendly notes** — use plain text, simple lists, and bold markers; export individual entries as Markdown.
-- **Local-first privacy** — no account, tracking, analytics, or application server needed for journal entries. Content is stored in this browser's local storage.
-- **Backup and restore** — export a Markdown archive and JSON backup, and import a Daymark JSON backup or Markdown text.
-- **Responsive layout** — desktop sidebar and mobile navigation.
+- Agency homepage and service overview
+- Website development, video editing, and graphic design service cards
+- Concept portfolio with clearly labelled demonstration work
+- Four-step project process
+- Configurable INR and USD website package display
+- India / Global market selector saved in local storage
+- Project enquiry modal with validation
+- About, FAQ, and contact sections
+- Responsive navigation and mobile layouts
+- Basic SEO metadata and Open Graph tags
+- Optional WhatsApp contact button
 
 ## Development
 
-Requires Node.js 20+ and npm.
+Requires Node.js 20+.
 
 ```sh
 npm install
 npm run dev
 npm run build
+npm run preview
 ```
 
-## Storage note
+## Environment variables
 
-Your journal is saved in the browser on this device. Clearing browser data can remove it. Use **Settings & backup → Export backup** periodically to download your Markdown and JSON copies. This app does not sync notes to a server and does not write directly to an Obsidian vault or filesystem.
+Create a `.env.local` file for local development or configure these in the deployment platform:
 
-## Project status
+- `VITE_CONTACT_EMAIL` — optional destination email. If set, submitting the enquiry opens the visitor's email application with a prepared message.
+- `VITE_WHATSAPP_NUMBER` — optional WhatsApp number in international format, digits only (for example, country code + number). Do not include spaces or the plus sign.
 
-The previous RunStats Studio application is preserved on branch `backup/runstats-studio-2026-10-26`. The `main` branch now contains Daymark.
+The enquiry form is intentionally not presented as a connected backend form. If no contact email is configured, it attempts to copy the enquiry text to the visitor's clipboard and clearly explains that an enquiry inbox has not yet been connected. Configure a proper form endpoint or CRM integration before relying on website enquiries.
+
+## Pricing
+
+The INR and USD website packages are starter prices in `src/App.tsx`. Review and update them before launch to reflect actual deliverables, freelancer costs, taxes, payment fees, revisions and margins.
+
+## Deployment
+
+The existing Cloudflare Worker and D1 configuration are preserved. Static assets are built to `dist` and served through the existing Worker configuration. Existing API routes are not used by the new marketing site.
+
+Before production launch:
+
+1. Configure `VITE_CONTACT_EMAIL` and optionally `VITE_WHATSAPP_NUMBER`.
+2. Confirm pricing and package scope.
+3. Replace concept portfolio imagery/content with approved work as it becomes available.
+4. Add a real enquiry endpoint or CRM integration.
+5. Add privacy and terms pages appropriate to the business and jurisdictions served.
+6. Run `npm run build` and test the production deployment on desktop and mobile.
